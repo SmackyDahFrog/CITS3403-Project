@@ -1,0 +1,39 @@
+.stage-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.stage-header h1 {
+    font-size: 5rem;
+    margin-bottom: 10px;
+}
+
+.stage-grid {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 50px;
+}
+
+.stage-card {
+    width: 220px;
+    min-height: 280px;
+    border: 2px solid #d9d9d9;
+    padding: 20px;
+    text-align: center;
+    transform: rotate(-6deg);
+    background: transparent;
+}
+
+.stage-card:nth-child(2) {
+    transform: rotate(6deg);
+}
+
+.stage-card:nth-child(3) {
+    transform: rotate(-8deg);
+}
+
+.stage-card h2 {
+    margin-top: 0;
+}

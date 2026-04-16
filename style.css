@@ -1,0 +1,111 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #1e1e1e;
+    color: white;
+}
+
+.page-frame {
+    margin: 20px;
+    border: 2px solid #d9d9d9;
+    min-height: 90vh;
+    padding: 30px;
+    box-sizing: border-box;
+}
+
+.top-banner {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+}
+
+.logo {
+    width: 220px;
+    height: auto;
+    border: 1px solid #ccc;
+    background: white;
+    display: block;
+    margin-bottom: 15px;
+}
+
+.title-box {
+    border: 2px solid #cfcfcf;
+    padding: 20px 30px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.title-box h1 {
+    margin: 0;
+    font-size: 3rem;
+}
+
+.main-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1fr;
+    gap: 40px;
+}
+
+.info-box,
+.login-box,
+.leaderboard-box {
+    border: 2px solid #cfcfcf;
+    padding: 20px;
+}
+
+.info-box h2,
+.login-box h2,
+.leaderboard-box h2 {
+    margin-top: 0;
+}
+
+.login-box form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input {
+    padding: 12px;
+    font-size: 1rem;
+    border: 1px solid #bbb;
+    background: #2c2c2c;
+    color: white;
+}
+
+.create-account {
+    color: #6fb7ff;
+    text-decoration: underline;
+    margin: 6px 0 10px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 12px 18px;
+    border: 1px solid #ddd;
+    background: #2f2f2f;
+    color: white;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #444;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 10px 6px;
+    border-bottom: 1px solid #555;
+}
