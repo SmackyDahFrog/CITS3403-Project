@@ -30,3 +30,14 @@
     font-size: 3rem;
     cursor: pointer;
 }
+
+.tttCell.winning {
+    background: #15a438;
+    color: #1e1e1e;
+    animation: pulse 0.6s ease-in-out 3;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.1); }
+}
