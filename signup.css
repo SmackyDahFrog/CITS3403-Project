@@ -1,0 +1,15 @@
+.input-valid {
+    border-color: #198754 !important;
+}
+
+.input-invalid {
+    border-color: #dc3545 !important;
+}
+
+.card a {
+    color: #6ea8fe;
+}
+
+.card a:hover {
+    color: white;
+}
