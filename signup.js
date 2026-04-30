@@ -37,7 +37,7 @@ function validatePasswords(){
         password.classList.add('input-invalid');
         password.classList.remove('input-valid');
     }
-    else if (value.length > 8 && hasLetter && hasNumber && hasSymbol){
+    else if (value.length >= 8 && hasLetter && hasNumber && hasSymbol){
         password.classList.add('input-valid');
         password.classList.remove('input-invalid');
 
