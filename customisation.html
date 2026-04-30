@@ -14,7 +14,33 @@
 
 <body class="min-vh-100 d-flex flex-column">
 
-    <!-- navbar goes here -->
+    <nav class = "profile-navbar">
+    <a class = "brand" href = "stages.html">YOU GOOD MUD?</a>
+
+    <div class ="dropdown">
+        <button class = "profile-btn" type = "button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class = "profile-initial" id = "navProfileDisplay">?</div>
+        </button>
+        <ul class = "dropdown-menu dropdown-menu-end dropdown-menu-dark">
+            <li>
+                <span class="dropdown-item-text text-secondary small" id="navDisplayName">
+                Guest
+                </span>
+            </li>
+            <li><hr class = "dropdown-divider"></li>
+            <li>
+                <a class = "dropdown-item" href="customisation.html">
+                    &#9881; Customise Profile
+                </a>
+            </li>
+            <li>
+                <a class = "dropdown-item text-danger" href ="MainPage.html" onclick="handleLogout()">
+                    &#8594; Logout
+                </a>
+            </li>
+        </ul>
+    </div>
+</nav>
 
     <div class="container flex-grow-1 d-flex align-items-center">
         <div class="row w-100 justify-content-center">
