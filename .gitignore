@@ -6,17 +6,17 @@ __pycache__/
 venv/
 env/
 
-# secrets and local env
+#secrets and local env
 .env
 .env.*
 !.env.example
 
-#sqlite + migrations cache
+# sqlite + migrations cache
 *.db
 *.sqlite
 instance/
 
-#editor / OS noise
+#  editor / OS noise
 .vscode/
 .idea/
 .DS_Store

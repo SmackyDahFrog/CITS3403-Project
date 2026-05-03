@@ -22,7 +22,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     login_manager.login_view = 'main.login'
 
-    # blueprint holds every route under main.*
+    #  blueprint holds every route under main.*
     from app.routes import main_bp
     app.register_blueprint(main_bp)
 
@@ -31,5 +31,5 @@ def create_app(config_class=Config):
 
 @login_manager.user_loader
 def load_user(user_id):
-    #flask-login passes the id back as a string
+    # flask-login passes the id back as a string
     return User.query.get(int(user_id))
