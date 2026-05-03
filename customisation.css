@@ -1,0 +1,21 @@
+/* avatar selection styles*/
+.avatar-option img {
+    cursor: pointer;
+    opacity: 0.5;
+    transition: opacity 0.2s, border-color 0.2s;
+    object-fit: cover;
+}
+
+.avatar-option img.selected {
+    opacity: 1;
+    border-color: white !important;
+}
+
+.avatar-option img:hover {
+    opacity: 0.85;
+}
+
+.form-text {
+    color: #aaa;
+    font-size: 0.85rem;
+}

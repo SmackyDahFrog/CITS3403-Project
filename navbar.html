@@ -1,0 +1,33 @@
+<!--
+navbar.html is a shared navbar for all post-login pages. 
+use this code at top of body of the required pages.
+make sure the page links navbar.css and navbar.js.
+-->
+
+<nav class = "profile-navbar">
+    <a class = "brand" href = "stages.html">YOU GOOD MUD?</a>
+
+    <div class ="dropdown">
+        <button class = "profile-btn" type = "button" data-bs-toggle="dropdown" aria-expanded="false">
+            <div class = "profile-initial" id = "navProfileDisplay">?</div>
+        </button>
+        <u1 class = "dropdown-menu dropdown-menu-end dropdown-menu-dark">
+            <li>
+                <span class="dropdown-item-text text-secondary small" id="navDisplayName"
+                Guest
+            </span>
+            </li>
+            <li><hr class = "dropdown-divider"></li>
+            <li>
+                <a class = "dropdown-item" href="customisation.html">
+                    &#9881; Customise Profile
+                </a>
+            </li>
+            <li>
+                <a class = "dropdown-item text-danger" href ="MainPage.html" onclick="handleLogout()">
+                    &#8594; Logout
+                </a>
+            </li>
+        </u1>
+    </div>
+</nav>
