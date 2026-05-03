@@ -53,12 +53,20 @@
                         <p class="small mb-0">Your display name is what appears on the leaderboard.</p>
                     </div>
 
+                    <form method="POST" action="{{ url_for('main.customisation') }}">
+                    {{ form.hidden_tag() }}
+
                     <!-- Display Name -->
                     <div class="mb-4">
                         <label for="displayName" class="form-label">Display Name</label>
-                        <input type="text" id="displayName" name="displayName" class="form-control"
+                        <input type="text" id="displayName" name="display_name" class="form-control"
                             maxlength="20" placeholder="Enter your display name">
                         <div class="form-text">Max 20 characters. Different from your username.</div>
+                        {% if form.display_name.errors %}
+                            {% for error in form.display_name.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
                     <!-- Avatar Selection -->
@@ -108,12 +116,18 @@
                             </div>
 
                         </div>
-                        <input type="hidden" id="selectedAvatar" value="av1">
+                        <input type="hidden" id="selectedAvatar" name="avatar" value="av1">
+                        {% if form.avatar.errors %}
+                            {% for error in form.avatar.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
-                    <button class="btn btn-primary w-100 mb-3" onclick="handleCustomisation()">
+                    <button type="submit" class="btn btn-primary w-100 mb-3">
                         Save &amp; Start Playing
                     </button>
+                    </form>
 
                     <p class="text-center mb-0">
                         <a href="{{ url_for('main.stages') }}">Skip for now</a>
