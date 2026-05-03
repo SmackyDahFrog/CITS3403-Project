@@ -32,6 +32,9 @@
                         <h2>Create Account</h2>
                     </div>
 
+                    <form method="POST" action="{{ url_for('main.signup') }}">
+                    {{ form.hidden_tag() }}
+
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <input type="text" id="username" name="username" class="form-control"
@@ -39,24 +42,40 @@
                         <div id="usernameError" class="text-danger small" style="display:none;">
                             Username must be at least 4 characters.
                         </div>
+                        {% if form.username.errors %}
+                            {% for error in form.username.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" id="password" name="password" class="form-control"
                             maxlength="32" placeholder="Min. 8 characters" oninput="validatePasswords()">
+                        {% if form.password.errors %}
+                            {% for error in form.password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
                     <div class="mb-3">
                         <label for="confirmPassword" class="form-label">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirmPassword" class="form-control"
+                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control"
                             maxlength="32" placeholder="Re-enter your password" oninput="validatePasswords()">
                         <div id="passwordError" class="text-danger small" style="display:none;">
                             Passwords do not match.
                         </div>
+                        {% if form.confirm_password.errors %}
+                            {% for error in form.confirm_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
 
-                    <button class="btn btn-primary w-100 mb-3" onclick="handleSignup()">Create Account</button>
+                    <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+                    </form>
 
                     <p class="text-center mb-0">
                         Already have an account?
