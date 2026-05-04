@@ -1,0 +1,23 @@
+# python build & cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+#secrets and local env
+.env
+.env.*
+!.env.example
+
+# sqlite + migrations cache
+*.db
+*.sqlite
+instance/
+
+#  editor / OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
