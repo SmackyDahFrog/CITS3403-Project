@@ -24,7 +24,7 @@ def login():
     return render_template('MainPage.html', form=form)
 
 
-@main_bp.route('/signup', methods=['GET', 'POST'])
+@main_bp.route('/signup', methods=['GET', 'POST']) 
 def signup():
     form = SignupForm()
     if form.validate_on_submit():
