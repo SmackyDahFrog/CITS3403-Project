@@ -4,8 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RNG Tic</title>
-    <link rel="stylesheet" href="../style.css">
-    <link rel="stylesheet" href="mainPage.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticTacToe.css') }}">
 </head>
 <body>
     <div class="page-frame">
@@ -30,6 +29,6 @@
         </div>
     </div>
  
-    <script src="{{ url_for('static', filename='js/tictactoe.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/gameLogic.js') }}"></script>
 </body>
 </html>

@@ -60,7 +60,7 @@ def stages():
 @main_bp.route('/tictactoe')
 @login_required
 def tictactoe():
-    return render_template('tictactoe.html')
+    return render_template('ticTacToe.html')
 
 @main_bp.route('/logout')
 @login_required
