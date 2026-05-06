@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
-    <title>Create Account</title>
-</head>
+{% block title %}Create Account — YOU GOOD MUD?{% endblock %}
 
-<body class="min-vh-100 d-flex align-items-center">
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/signup.css') }}">
+{% endblock %}
 
-    <div class="container">
-
+{% block content %}
+<div class="container min-vh-100 d-flex align-items-center">
+    <div class="w-100">
         <div class="row">
             <div class="col text-center">
                 <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Website Logo" class="img-fluid w-25 mb-3">
@@ -22,75 +17,63 @@
                 <p>Test your skills, pass all 3 games and you're good!</p>
             </div>
         </div>
-
         <div class="row justify-content-center mt-4">
             <div class="col-12 col-md-6 col-lg-4">
-
                 <div class="card p-4">
-
                     <div class="text-center mb-3">
                         <h2>Create Account</h2>
                     </div>
-
                     <form method="POST" action="{{ url_for('main.signup') }}">
-                    {{ form.hidden_tag() }}
-
-                    <div class="mb-3">
-                        <label for="username" class="form-label">Username</label>
-                        <input type="text" id="username" name="username" class="form-control"
-                            maxlength="15" placeholder="Min. 4 characters" oninput="validateUsername()">
-                        <div id="usernameError" class="text-danger small" style="display:none;">
-                            Username must be at least 4 characters.
+                        {{ form.hidden_tag() }}
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" name="username" class="form-control"
+                                maxlength="15" placeholder="Min. 4 characters" oninput="validateUsername()">
+                            <div id="usernameError" class="text-danger small" style="display:none;">
+                                Username must be at least 4 characters.
+                            </div>
+                            {% if form.username.errors %}
+                                {% for error in form.username.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                        {% if form.username.errors %}
-                            {% for error in form.username.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" id="password" name="password" class="form-control"
-                            maxlength="32" placeholder="Min. 8 characters" oninput="validatePasswords()">
-                        {% if form.password.errors %}
-                            {% for error in form.password.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="confirmPassword" class="form-label">Confirm Password</label>
-                        <input type="password" id="confirmPassword" name="confirm_password" class="form-control"
-                            maxlength="32" placeholder="Re-enter your password" oninput="validatePasswords()">
-                        <div id="passwordError" class="text-danger small" style="display:none;">
-                            Passwords do not match.
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" name="password" class="form-control"
+                                maxlength="32" placeholder="Min. 8 characters" oninput="validatePasswords()">
+                            {% if form.password.errors %}
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
                         </div>
-                        {% if form.confirm_password.errors %}
-                            {% for error in form.confirm_password.errors %}
-                                <div class="text-danger small">{{ error }}</div>
-                            {% endfor %}
-                        {% endif %}
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+                        <div class="mb-3">
+                            <label for="confirmPassword" class="form-label">Confirm Password</label>
+                            <input type="password" id="confirmPassword" name="confirm_password" class="form-control"
+                                maxlength="32" placeholder="Re-enter your password" oninput="validatePasswords()">
+                            <div id="passwordError" class="text-danger small" style="display:none;">
+                                Passwords do not match.
+                            </div>
+                            {% if form.confirm_password.errors %}
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="text-danger small">{{ error }}</div>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
                     </form>
-
                     <p class="text-center mb-0">
                         Already have an account?
                         <a href="{{ url_for('main.login') }}">Login</a>
                     </p>
-
                 </div>
-
             </div>
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/signup.js') }}"></script>
-
-</body>
-
-</html>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/signup.js') }}"></script>
+{% endblock %}
