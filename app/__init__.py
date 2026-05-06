@@ -3,7 +3,7 @@ from flask_login import LoginManager
 from flask_migrate import Migrate
 from dotenv import load_dotenv
 
-from app.config import Config
+from app.config import DevelopmentConfig
 from app.models import db, User
 
 load_dotenv()
@@ -12,7 +12,7 @@ login_manager = LoginManager()
 migrate = Migrate()
 
 
-def create_app(config_class=Config):
+def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
