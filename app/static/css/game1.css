@@ -1,0 +1,53 @@
+body {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+.game-area {
+    position: relative;
+    max-width: 1100px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.background-image {
+    width: 100%;
+    display: block;
+    border-radius: 8px;
+}
+
+#wilson {
+    position: absolute;
+    cursor: pointer;
+    pointer-events: none;
+}
+
+.game-area.active #wilson {
+    pointer-events: auto;
+}
+
+.start-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    background: black;
+}
+
+.overlay-content {
+    background: black;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+}
+
+.result-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    background: rgba(0,0,0, 0.8);
+}
