@@ -57,6 +57,10 @@ def customisation():
 def stages():
     return render_template('stages.html')
 
+@main_bp.route('/tictactoe')
+@login_required
+def tictactoe():
+    return render_template('tictactoe.html')
 
 @main_bp.route('/logout')
 @login_required
