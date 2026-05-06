@@ -24,7 +24,7 @@ def login():
     return render_template('MainPage.html', form=form)
 
 
-@main_bp.route('/signup', methods=['GET', 'POST'])
+@main_bp.route('/signup', methods=['GET', 'POST']) 
 def signup():
     form = SignupForm()
     if form.validate_on_submit():
@@ -56,6 +56,11 @@ def customisation():
 @login_required
 def stages():
     return render_template('stages.html')
+
+@main_bp.route('/tictactoe')
+@login_required
+def tictactoe():
+    return render_template('ticTacToe.html')
 
 @main_bp.route('/game1')
 @login_required
