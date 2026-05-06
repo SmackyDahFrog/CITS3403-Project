@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Where's Wilson</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/game1.css') }}">
+    </head>
+
+    <body>
+
+        <div class="container py-4 text-center">
+            <!--Instructions-->
+            <h1>Where's Wilson?</h1>
+            <p>Find Wilson as fast as you can, by clicking on him!</p>
+            <p id="timer">Time: 0.00s</p>
+
+            <div class="game-area">
+                <!--img-fluid to make sure it works on multiple different screens-->
+                <img src="{{ url_for('static', filename='images/game1background.jpg') }}" alt="Where's Wilson game background" class="img-fluid background-image">
+                <img src="{{ url_for('static', filename='images/wilson.png') }}" alt="Wilson" id="wilson">
+
+                <div class="start-overlay" id="startOverlay">
+                    <div class="overlay-content text-center">
+                        <p class="mb-3">Press Start when you're ready!</p>
+                        <button id="start-button" class="btn btn-light">Start</button>
+                    </div>
+                </div>
+
+                <div class="result-overlay" id="resultOverlay">
+                    <div class="overlay-content text-center">
+                        <p id="result-message" class="mb-3"></p>
+                        <button id="play-again-button" class="btn btn-light">Play Again</button>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="mt-4">
+                <h2>Leaderboard</h2>
+                <p>Scores will go here</p>
+            </div>
+
+        </div>
+
+        <script src="{{ url_for('static', filename='js/game1.js') }}"></script>
+        
+    </body>
+
+</html>

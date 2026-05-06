@@ -57,6 +57,10 @@ def customisation():
 def stages():
     return render_template('stages.html')
 
+@main_bp.route('/game1')
+@login_required
+def game1():
+    return render_template('game1.html')
 
 @main_bp.route('/logout')
 @login_required
