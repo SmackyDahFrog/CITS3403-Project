@@ -85,6 +85,25 @@ function checkUsernameAvailability(username){
         });
 }
 
+function showPasswordRules(){
+    const popup = document.getElementById('passwordRules');
+    if (!popup) return;
+    const value = document.getElementById('password').value;
+    // the popup only appears once the user has actually started typing
+    if (value.length > 0) {
+        popup.style.display = 'block';
+    }
+}
+
+function maybeHidePasswordRules(){
+    const popup = document.getElementById('passwordRules');
+    if (!popup) return;
+    const value = document.getElementById('password').value;
+    if (value.length === 0 || passwordRulesAllMet()) {
+        popup.style.display = 'none';
+    }
+}
+
 function passwordRulesAllMet(){
     const value = document.getElementById('password').value;
     return value.length >= 8
@@ -97,6 +116,7 @@ function validatePasswords(){
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
     const error = document.getElementById('passwordError');
+    const popup = document.getElementById('passwordRules');
     const value = password.value;
     const confirmValue = confirmPassword.value;
 
@@ -104,16 +124,39 @@ function validatePasswords(){
     clearServerError('password');
     clearServerError('confirm_password');
 
-    const hasLength = value.length >= 8;
-    const hasLetter = /[a-zA-Z]/.test(value);
-    const hasNumber = /[0-9]/.test(value);
-    const hasSymbol = /[!@#$%&*_]/.test(value);
+    const checks = {
+        length: value.length >= 8,
+        letter: /[a-zA-Z]/.test(value),
+        number: /[0-9]/.test(value),
+        symbol: /[!@#$%&*_]/.test(value),
+    };
 
-    if (value.length > 0 && (!hasLength || !hasLetter || !hasNumber || !hasSymbol)){
+    // mark each rule as met or pending so the popup reflects current state
+    if (popup) {
+        const items = popup.querySelectorAll('.rule-item');
+        items.forEach(function(item){
+            const rule = item.getAttribute('data-rule');
+            if (checks[rule]) {
+                item.classList.add('rule-met');
+            } else {
+                item.classList.remove('rule-met');
+            }
+        });
+        if (value.length === 0) {
+            popup.style.display = 'none';
+        } else if (passwordRulesAllMet()) {
+            // hide once everything is satisfied so the form is uncluttered
+            popup.style.display = 'none';
+        } else if (document.activeElement === password) {
+            popup.style.display = 'block';
+        }
+    }
+
+    if (value.length > 0 && !passwordRulesAllMet()){
         password.classList.add('input-invalid');
         password.classList.remove('input-valid');
     }
-    else if (value.length >= 8 && hasLetter && hasNumber && hasSymbol){
+    else if (passwordRulesAllMet()){
         password.classList.add('input-valid');
         password.classList.remove('input-invalid');
 

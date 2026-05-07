@@ -52,10 +52,20 @@
                         {% endif %}
                     </div>
 
-                    <div class="mb-3">
+                    <div class="mb-3 position-relative">
                         <label for="password" class="form-label">Password</label>
                         <input type="password" id="password" name="password" class="form-control"
-                            maxlength="32" placeholder="Min. 8 characters" oninput="validatePasswords()">
+                            maxlength="32" placeholder="Min. 8 characters"
+                            oninput="validatePasswords()" onfocus="showPasswordRules()" onblur="maybeHidePasswordRules()">
+                        <div id="passwordRules" class="password-rules" style="display:none;">
+                            <div class="rules-title">Password needs:</div>
+                            <ul class="rules-list">
+                                <li data-rule="length" class="rule-item">8 characters or more</li>
+                                <li data-rule="letter" class="rule-item">a letter</li>
+                                <li data-rule="number" class="rule-item">a number</li>
+                                <li data-rule="symbol" class="rule-item">a symbol (! @ # $ % &amp; * _)</li>
+                            </ul>
+                        </div>
                         {% if form.password.errors %}
                             {% for error in form.password.errors %}
                                 <div class="text-danger small server-error" data-field="password">{{ error }}</div>
