@@ -120,7 +120,6 @@ function passwordRulesAllMet(){
 function validatePasswords(){
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
-    const warning = document.getElementById('passwordWarning');
     const error = document.getElementById('passwordError');
     const popup = document.getElementById('passwordRules');
     const value = password.value;
@@ -144,7 +143,7 @@ function validatePasswords(){
         symbol: /[!@#$%&*_]/.test(value),
     };
 
-    // mark each rule as met or pending so the popup reflects current state
+    // each rule item is the visible warning, gets a tick once its check passes
     if (popup) {
         const items = popup.querySelectorAll('.rule-item');
         items.forEach(function(item){
@@ -160,24 +159,8 @@ function validatePasswords(){
         } else if (passwordRulesAllMet()) {
             // hide once everything is satisfied so the form is uncluttered
             popup.style.display = 'none';
-        } else if (document.activeElement === password) {
+        } else if (passwordTouched) {
             popup.style.display = 'block';
-        }
-    }
-
-    // build a single warning that lists only the still-failing pieces
-    if (warning) {
-        if (passwordTouched && value.length > 0 && !passwordRulesAllMet()) {
-            const missing = [];
-            if (!checks.length) missing.push('8+ characters');
-            if (!checks.letter) missing.push('a letter');
-            if (!checks.number) missing.push('a number');
-            if (!checks.symbol) missing.push('a symbol (! @ # $ % & * _)');
-            warning.style.display = 'block';
-            warning.textContent = 'Password still needs: ' + missing.join(', ') + '.';
-        } else {
-            warning.style.display = 'none';
-            warning.textContent = '';
         }
     }
 
