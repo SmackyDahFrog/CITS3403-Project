@@ -1,4 +1,8 @@
 let usernameCheckTimer = null;
+// only show the live availability + warnings once the user has actually touched the field
+let usernameTouched = false;
+let passwordTouched = false;
+let confirmTouched = false;
 // last verdict from /check-username, kept here so updateSubmitState can read it
 let usernameAvailable = false;
 
@@ -7,6 +11,7 @@ function validateUsername() {
     const error = document.getElementById('usernameError');
     const status = document.getElementById('usernameStatus');
     const value = input.value.trim();
+    usernameTouched = true;
 
     // hide any stale availability message while the user is still typing
     status.style.display = 'none';
@@ -115,10 +120,18 @@ function passwordRulesAllMet(){
 function validatePasswords(){
     const password = document.getElementById('password');
     const confirmPassword = document.getElementById('confirmPassword');
+    const warning = document.getElementById('passwordWarning');
     const error = document.getElementById('passwordError');
     const popup = document.getElementById('passwordRules');
     const value = password.value;
     const confirmValue = confirmPassword.value;
+
+    if (document.activeElement === password && value.length > 0) {
+        passwordTouched = true;
+    }
+    if (document.activeElement === confirmPassword && confirmValue.length > 0) {
+        confirmTouched = true;
+    }
 
     // typing into either password field invalidates the server-side warnings
     clearServerError('password');
@@ -152,6 +165,22 @@ function validatePasswords(){
         }
     }
 
+    // build a single warning that lists only the still-failing pieces
+    if (warning) {
+        if (passwordTouched && value.length > 0 && !passwordRulesAllMet()) {
+            const missing = [];
+            if (!checks.length) missing.push('8+ characters');
+            if (!checks.letter) missing.push('a letter');
+            if (!checks.number) missing.push('a number');
+            if (!checks.symbol) missing.push('a symbol (! @ # $ % & * _)');
+            warning.style.display = 'block';
+            warning.textContent = 'Password still needs: ' + missing.join(', ') + '.';
+        } else {
+            warning.style.display = 'none';
+            warning.textContent = '';
+        }
+    }
+
     if (value.length > 0 && !passwordRulesAllMet()){
         password.classList.add('input-invalid');
         password.classList.remove('input-valid');
@@ -159,21 +188,23 @@ function validatePasswords(){
     else if (passwordRulesAllMet()){
         password.classList.add('input-valid');
         password.classList.remove('input-invalid');
-
-        if (confirmValue.length > 0 && confirmValue !== value) {
-            error.style.display = 'block';
-            error.textContent = 'Passwords do not match.';
-            confirmPassword.classList.add('input-invalid');
-            confirmPassword.classList.remove('input-valid');
-        } else if (confirmValue === value) {
-            error.style.display = 'none';
-            confirmPassword.classList.add('input-valid');
-            confirmPassword.classList.remove('input-invalid');
-        }
     }
     else {
-        error.style.display = 'none';
         password.classList.remove('input-valid', 'input-invalid');
+    }
+
+    // confirm-password warning, only after the user has typed in that box
+    if (confirmTouched && confirmValue.length > 0 && confirmValue !== value) {
+        error.style.display = 'block';
+        error.textContent = 'Passwords do not match.';
+        confirmPassword.classList.add('input-invalid');
+        confirmPassword.classList.remove('input-valid');
+    } else if (confirmValue.length > 0 && confirmValue === value && passwordRulesAllMet()) {
+        error.style.display = 'none';
+        confirmPassword.classList.add('input-valid');
+        confirmPassword.classList.remove('input-invalid');
+    } else {
+        error.style.display = 'none';
         confirmPassword.classList.remove('input-valid', 'input-invalid');
     }
 

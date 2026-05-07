@@ -66,6 +66,7 @@
                                 <li data-rule="symbol" class="rule-item">a symbol (! @ # $ % &amp; * _)</li>
                             </ul>
                         </div>
+                        <div id="passwordWarning" class="text-danger small" style="display:none;"></div>
                         {% if form.password.errors %}
                             {% for error in form.password.errors %}
                                 <div class="text-danger small server-error" data-field="password">{{ error }}</div>
