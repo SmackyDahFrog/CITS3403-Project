@@ -1,10 +1,18 @@
-from flask import Blueprint, flash, redirect, render_template, url_for
+import time
+from collections import defaultdict, deque
+
+from flask import Blueprint, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
 from app.forms import CustomisationForm, LoginForm, SignupForm
 from app.models import User, db
 
 main_bp = Blueprint('main', __name__)
+
+# per-IP timestamps for the username probe, keeps abusers from hammering it
+_username_check_hits = defaultdict(deque)
+USERNAME_CHECK_WINDOW = 10.0
+USERNAME_CHECK_LIMIT = 20
 
 
 @main_bp.route('/', methods=['GET', 'POST'])
@@ -24,7 +32,32 @@ def login():
     return render_template('MainPage.html', form=form)
 
 
-@main_bp.route('/signup', methods=['GET', 'POST']) 
+@main_bp.route('/check-username')
+def check_username():
+    # lightweight uniqueness probe used by signup.js to flag taken names live
+    ip = request.remote_addr or 'unknown'
+    now = time.time()
+    hits = _username_check_hits[ip]
+    # drop entries that have aged out of the window
+    while hits and now - hits[0] > USERNAME_CHECK_WINDOW:
+        hits.popleft()
+    if len(hits) >= USERNAME_CHECK_LIMIT:
+        return jsonify({'available': False, 'reason': 'rate_limited'}), 429
+    hits.append(now)
+
+    username = request.args.get('username', '').strip()
+    if len(username) < 4:
+        return jsonify({'available': False, 'reason': 'short'})
+    if len(username) > 15:
+        return jsonify({'available': False, 'reason': 'long'})
+    # only basic chars are accepted, mirrors what we'd want stored
+    if not all(c.isalnum() or c in ('_', '-') for c in username):
+        return jsonify({'available': False, 'reason': 'invalid'})
+    taken = User.query.filter_by(username=username).first() is not None
+    return jsonify({'available': not taken, 'reason': 'taken' if taken else None})
+
+
+@main_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     form = SignupForm()
     if form.validate_on_submit():
