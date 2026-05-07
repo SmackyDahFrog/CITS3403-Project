@@ -72,51 +72,9 @@
                     <!-- Avatar Selection -->
                     <div class="mb-4">
                         <label class="form-label">Choose a Profile Picture</label>
-                        <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
-
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av1.png') }}" alt="Avatar 1" width="64" height="64"
-                                    class="rounded-circle border border-2 selected"
-                                    onclick="selectAvatar(this, 'av1')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av2.png') }}" alt="Avatar 2" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av2')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av3.png') }}" alt="Avatar 3" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av3')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av4.png') }}" alt="Avatar 4" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av4')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av5.png') }}" alt="Avatar 5" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av5')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av6.png') }}" alt="Avatar 6" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av6')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av7.png') }}" alt="Avatar 7" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av7')">
-                            </div>
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av8.png') }}" alt="Avatar 8" width="64" height="64"
-                                    class="rounded-circle border border-2"
-                                    onclick="selectAvatar(this, 'av8')">
-                            </div>
-
-                        </div>
-                        <input type="hidden" id="selectedAvatar" name="avatar" value="av1">
+                        {% with selected_avatar=current_user.avatar or 'av1', field_name='avatar' %}
+                            {% include '_avatar_grid.html' %}
+                        {% endwith %}
                         {% if form.avatar.errors %}
                             {% for error in form.avatar.errors %}
                                 <div class="text-danger small">{{ error }}</div>
