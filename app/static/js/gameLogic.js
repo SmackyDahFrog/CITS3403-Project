@@ -88,3 +88,15 @@ cells.forEach((cell, i) => {
         aiMove();
     });
 });
+
+function resetGame() {
+    board = ['', '', '', '', '', '', '', '', ''];
+    gameOver = false;
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.classList.remove('winning');
+        cell.classList.remove('draw');
+    });
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetGame);
