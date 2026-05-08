@@ -8,8 +8,8 @@
         integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stages.css') }}">
-    <title>Select a Stage</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/kai.css') }}">
+    <title>Kai's Game</title>
 </head>
 
 <body class="min-vh-100 d-flex flex-column">
@@ -42,44 +42,28 @@
     </div>
 </nav>
 
-    <div class="container py-5">
-
-        <header class="stage-header">
-            <h1>Choose a Game!</h1>
-        </header>
-
-        <main class="stage-grid">
-            <article class="stage-card">
-                <h2>Stage 1</h2>
-                <p>Where's Wilson</p>
-                <button class="btn btn-light">Play</button>
-            </article>
-
-            <article class="stage-card">
-                <h2>Stage 2</h2>
-                <p>RNG tictactoe</p>
-                <button class="btn btn-light">Play</button>
-            </article>
-
-            <article class="stage-card">
-                <h2>Stage 3</h2>
-                <p>Kai's Game Idea</p>
-                <a class="btn btn-light" href="{{ url_for('main.play_kai') }}">Play</a>
-            </article>
-        </main>
-
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <h1 class="text-center mb-3">Kai's Game</h1>
+                <p class="text-center text-secondary mb-3">
+                    Click the ball before your score bleeds to zero. Each hit shrinks it.
+                </p>
+                <div class="d-flex justify-content-center mb-3">
+                    <canvas id="kaiCanvas" width="600" height="600"></canvas>
+                </div>
+                <div class="text-center">
+                    <button id="restartBtn" class="btn btn-light">Restart (R)</button>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <audio id="tickHover" src="{{ url_for('static', filename='sounds/milkteatrackv2.ogg') }}" preload="auto"></audio>
-    <!-- <audio id="tickClick" src="{{ url_for('static', filename='sounds/Tick3.ogg') }}" preload="auto"></audio> -->
-    <audio id="tickClick" src="{{ url_for('static', filename='sounds/milkteatrackv2.ogg') }}" preload="auto"></audio>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I"
         crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/stages.js') }}"></script>
-
+    <script src="{{ url_for('static', filename='js/kai-game.js') }}"></script>
 </body>
 
 </html>

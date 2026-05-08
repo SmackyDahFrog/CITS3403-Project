@@ -58,6 +58,13 @@ def stages():
     return render_template('stages.html')
 
 
+@main_bp.route('/play/kai')
+@login_required
+def play_kai():
+    # leaderboard panel comes in a later phase, kai.html just renders the canvas for now
+    return render_template('games/kai.html')
+
+
 @main_bp.route('/logout')
 @login_required
 def logout():

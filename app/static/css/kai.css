@@ -1,0 +1,14 @@
+/* kai.css - per-game styling, layout otherwise leans on Bootstrap and MainPage.css */
+
+#kaiCanvas {
+    background: #1e1e1e;
+    border: 2px solid #d9d9d9;
+    cursor: crosshair;
+    /* keep the playfield from spilling on small screens */
+    max-width: 100%;
+    height: auto;
+}
+
+.list-group-item.bg-dark {
+    border-color: #333;
+}
