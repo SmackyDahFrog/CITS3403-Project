@@ -63,7 +63,7 @@
                     {% for score, user in top_scores %}
                     <li class="list-group-item bg-dark text-white d-flex justify-content-between">
                         <span>{{ user.display_name or user.username }}</span>
-                        <span>{{ score.value }}</span>
+                        <span>{{ '%.2f'|format(score.value / 1000) }}s</span>
                     </li>
                     {% else %}
                     <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
