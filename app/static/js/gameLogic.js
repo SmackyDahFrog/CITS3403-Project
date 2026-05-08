@@ -7,9 +7,9 @@ const lines = [
     [0,1,2], [3,4,5], [6,7,8],
     [0,3,6], [1,4,7], [2,5,8],
     [0,4,8], [2,4,6]
-]; // all winning line formations
+];
  
-function checkWinner(b) { // returns winner, or if draw
+function checkWinner(b) {
     for (const [a, c, d] of lines) {
         if (b[a] && b[a] === b[c] && b[a] === b[d]) {
             return { winner: b[a], line: [a, c, d] };
@@ -19,11 +19,26 @@ function checkWinner(b) { // returns winner, or if draw
     return null;
 }
  
-function highlightWin(line) { // highlight winning cells
+function highlightWin(line) {
     line.forEach(i => cells[i].classList.add('winning'));
 }
+
+function highlightDraw() {
+    cells.forEach(cell => cell.classList.add('draw'));
+}
+
+function handleResult(result) {
+    if (!result) return false;
+    gameOver = true;
+    if (result.winner === 'draw') {
+        highlightDraw();
+    } else if (result.line) {
+        highlightWin(result.line);
+    }
+    return true;
+}
  
-function minimax(b, isAI) { // minimax algo that gives the best optimal move
+function minimax(b, isAI) {
     const result = checkWinner(b);
     if (result?.winner === 'O') return { score: 1 };
     if (result?.winner === 'X') return { score: -1 };
@@ -44,7 +59,7 @@ function minimax(b, isAI) { // minimax algo that gives the best optimal move
     return { score: bestScore, index: bestMove };
 }
  
-function aiMove() { // move to pick, 85% being the optimal move
+function aiMove() {
     let move;
  
     if (Math.random() < 0.15) {
@@ -58,11 +73,7 @@ function aiMove() { // move to pick, 85% being the optimal move
     board[move] = 'O';
     cells[move].textContent = 'O';
  
-    const result = checkWinner(board);
-    if (result) {
-        gameOver = true;
-        if (result.line) highlightWin(result.line);
-    }
+    handleResult(checkWinner(board));
 }
  
 cells.forEach((cell, i) => {
@@ -72,12 +83,7 @@ cells.forEach((cell, i) => {
         board[i] = 'X';
         cell.textContent = 'X';
  
-        const result = checkWinner(board);
-        if (result) {
-            gameOver = true;
-            if (result.line) highlightWin(result.line);
-            return;
-        }
+        if (handleResult(checkWinner(board))) return;
  
         aiMove();
     });
