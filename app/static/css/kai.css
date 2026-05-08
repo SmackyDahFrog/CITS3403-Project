@@ -3,12 +3,50 @@
 #kaiCanvas {
     background: #1e1e1e;
     border: 2px solid #d9d9d9;
-    cursor: crosshair;
+    /* solid circle cursor with a thin black outline so it shows on the white ball, hotspot at centre */
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='white' stroke='black' stroke-width='1.5'/%3E%3C/svg%3E") 12 12, default;
     /* keep the playfield from spilling on small screens */
     max-width: 100%;
     height: auto;
 }
 
+/* leaderboard sits centred under the canvas, capped at the canvas width */
+.kai-leaderboard {
+    width: 100%;
+    max-width: 480px;
+}
+
 .list-group-item.bg-dark {
     border-color: #333;
+}
+
+/* the canvas and its narrow-viewport placeholder share a single slot in the layout */
+.kai-stage {
+    position: relative;
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* placeholder shown when the viewport is narrower than the canvas can fit, hidden otherwise */
+.kai-too-small {
+    display: none;
+    background: #2a2a2a;
+    border: 2px solid #d9d9d9;
+    color: #d9d9d9;
+    text-align: center;
+    padding: 60px 24px;
+    min-height: 300px;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/* swap the canvas out for the grey placeholder once the playfield can't fit on screen, leaving a small gutter on either side */
+@media (max-width: 1060px) {
+    #kaiCanvas {
+        display: none;
+    }
+    .kai-too-small {
+        display: flex;
+    }
 }

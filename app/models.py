@@ -29,3 +29,19 @@ class User(UserMixin, db.Model):
 
     def __repr__(self):
         return f'<User {self.username}>'
+
+
+class Score(db.Model):
+    __tablename__ = 'scores'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # game key tells us which leaderboard the row belongs to, e.g. 'kai'
+    game = db.Column(db.String(20), nullable=False, index=True)
+    value = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='scores')
+
+    def __repr__(self):
+        return f'<Score {self.game}:{self.value} user={self.user_id}>'
