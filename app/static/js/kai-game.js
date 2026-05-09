@@ -21,6 +21,9 @@ const GROW_DURATION_SEC = 0.3;
 const PRESSURE = 60;
 const EAT_BONUS = 35;
 const START_HUNGER = 100;
+// hunger bar geometry, lifted out so the centred timer above can sit on the same row
+const HUNGER_BAR_HEIGHT = 4;
+const HUNGER_BAR_Y = H - HUNGER_BAR_HEIGHT - 1;
 
 let canvas, ctx;
 // ballMaxR is the cap for the currently-spawned ball, ballSpawnedAt is when it appeared so
@@ -49,6 +52,18 @@ let mouseX = null;
 let mouseY = null;
 // css px to canvas px factor, recomputed each mousemove so the cursor hit radius scales with css resizing
 let canvasScale = 1;
+// sound effect played on each eat. dropdown values map to files under /static/sounds,
+// empty string is the "no sound" option. selection persists in localStorage so the
+// player isn't reset to the default every page load. rate scales playbackRate to make
+// a sluggish source clip punchier (Moshi's munch is too slow at native speed for the
+// rapid eat-loop), volume tones both clips down so they sit under the gameplay focus
+const SOUND_FILES = {
+    Tok3:  { src: '/static/sounds/Tok3.ogg',  rate: 1,   volume: 0.55 },
+    Moshi: { src: '/static/sounds/Moshi.mp3', rate: 1.5, volume: 0.55 },
+};
+const SOUND_STORAGE_KEY = 'kai-sound';
+const eatSounds = {};
+let activeSound = 'Tok3';
 
 function init() {
     canvas = document.getElementById('kaiCanvas');
@@ -63,8 +78,43 @@ function init() {
         restartBtn.addEventListener('click', gameSetup);
     }
 
+    // pre-load each sound once so the eat handler can fire-and-forget without rebuilding
+    // the Audio object every time. rate and volume from SOUND_FILES are applied here and
+    // persist across replays since the same Audio instance is reused on each eat
+    for (const key of Object.keys(SOUND_FILES)) {
+        const cfg = SOUND_FILES[key];
+        const audio = new Audio(cfg.src);
+        audio.playbackRate = cfg.rate;
+        audio.volume = cfg.volume;
+        eatSounds[key] = audio;
+    }
+
+    const soundSelect = document.getElementById('soundSelect');
+    if (soundSelect) {
+        // saved choice from a previous session takes precedence over the markup default
+        const saved = localStorage.getItem(SOUND_STORAGE_KEY);
+        if (saved !== null && (saved === '' || saved in SOUND_FILES)) {
+            activeSound = saved;
+            soundSelect.value = saved;
+        }
+        soundSelect.addEventListener('change', (e) => {
+            activeSound = e.target.value;
+            localStorage.setItem(SOUND_STORAGE_KEY, activeSound);
+        });
+    }
+
     gameSetup();
     requestAnimationFrame(gameLoop);
+}
+
+// fire the currently-selected eat sound, if any. currentTime reset means rapid eats can
+// retrigger the clip from the start instead of being silenced by a still-playing instance
+function playEatSound() {
+    const sound = eatSounds[activeSound];
+    if (!sound) return;
+    sound.currentTime = 0;
+    // browser autoplay policy may reject the first play before any user gesture, swallow it
+    sound.play().catch(() => {});
 }
 
 function gameSetup() {
@@ -121,6 +171,7 @@ function update(dt) {
             // record the moment of this eat in game-clock seconds, the gameover summary
             // averages the gaps between consecutive eats and drops any tighter than 100ms
             eatTimes.push(survivedTimeSec);
+            playEatSound();
             hunger += EAT_BONUS;
             // peak hunger this run sets the bar's denominator, so an eat that pushes
             // hunger above the previous high refills the bar back to a full strip
@@ -164,15 +215,15 @@ function draw() {
         drawHungerBar();
     }
 
-    // top-left readouts, the time survived is the metric that gets submitted to the leaderboard,
-    // the hunger bank below it is just the visible "you are about to die" indicator
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'top';
-    ctx.font = '28px Arial, sans-serif';
-    ctx.fillText('Time: ' + survivedSeconds().toFixed(3) + 's', 12, 12);
-    ctx.font = '18px Arial, sans-serif';
-    ctx.fillText('Hunger: ' + Math.floor(hunger), 12, 46);
+    // small survival timer sat just above the hunger bar, the only HUD readout left now
+    // that the bar's own colour and length cover the same job the top-left figures used to
+    if (!isGameOver) {
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.font = '14px Arial, sans-serif';
+        ctx.fillText(survivedSeconds().toFixed(3) + 's', W / 2, HUNGER_BAR_Y - 4);
+    }
 
     if (isGameOver) {
         // overlay with final time, per-eat pace, and restart prompt
@@ -219,10 +270,10 @@ function colourAtPosition(t) {
 
 function drawHungerBar() {
     // thin strip across the bottom, length itself is the gauge so no separate marker is needed
-    const barH = 4;
+    const barH = HUNGER_BAR_HEIGHT;
     const barX = 30;
     const barFullW = W - barX * 2;
-    const barY = H - barH - 1;
+    const barY = HUNGER_BAR_Y;
 
     // bar length tracks remaining hunger relative to this run's peak, anchored on the left
     // so the right edge recedes as pressure depletes hunger and the bar vanishes at hunger=0

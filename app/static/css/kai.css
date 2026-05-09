@@ -27,6 +27,19 @@
     max-width: 1000px;
 }
 
+/* sound dropdown sits below the bottom-left of the canvas, matching its 1000px max width
+   so the inner content lines up with the canvas's left edge */
+.kai-controls {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    align-items: center;
+}
+
+.kai-controls .form-select-sm {
+    max-width: 160px;
+}
+
 /* placeholder shown when the viewport is narrower than the canvas can fit, hidden otherwise */
 .kai-too-small {
     display: none;
