@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_login import LoginManager
 from flask_migrate import Migrate
+from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 
 from app.config import DevelopmentConfig
@@ -10,6 +11,8 @@ load_dotenv()
 
 login_manager = LoginManager()
 migrate = Migrate()
+# global csrf check, covers JSON endpoints like /api/scores that don't go through a FlaskForm
+csrf = CSRFProtect()
 
 
 def create_app(config_class=DevelopmentConfig):
@@ -21,6 +24,7 @@ def create_app(config_class=DevelopmentConfig):
     migrate.init_app(app, db)
     login_manager.init_app(app)
     login_manager.login_view = 'main.login'
+    csrf.init_app(app)
 
     #  blueprint holds every route under main.*
     from app.routes import main_bp
