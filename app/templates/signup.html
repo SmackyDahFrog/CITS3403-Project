@@ -25,29 +25,45 @@
                     </div>
                     <form method="POST" action="{{ url_for('main.signup') }}">
                         {{ form.hidden_tag() }}
+
                         <div class="mb-3">
                             <label for="username" class="form-label">Username</label>
                             <input type="text" id="username" name="username" class="form-control"
-                                maxlength="15" placeholder="Min. 4 characters" oninput="validateUsername()">
+                                maxlength="15" placeholder="Min. 4 characters"
+                                value="{{ request.form.username or '' }}"
+                                oninput="validateUsername()">
                             <div id="usernameError" class="text-danger small" style="display:none;">
                                 Username must be at least 4 characters.
                             </div>
+                            <div id="usernameStatus" class="small" style="display:none;"></div>
                             {% if form.username.errors %}
                                 {% for error in form.username.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
+                                    <div class="text-danger small server-error" data-field="username">{{ error }}</div>
                                 {% endfor %}
                             {% endif %}
                         </div>
-                        <div class="mb-3">
+
+                        <div class="mb-3 position-relative">
                             <label for="password" class="form-label">Password</label>
                             <input type="password" id="password" name="password" class="form-control"
-                                maxlength="32" placeholder="Min. 8 characters" oninput="validatePasswords()">
+                                maxlength="32" placeholder="Min. 8 characters"
+                                oninput="validatePasswords()" onfocus="showPasswordRules()" onblur="maybeHidePasswordRules()">
+                            <div id="passwordRules" class="password-rules" style="display:none;">
+                                <div class="rules-title">Password needs:</div>
+                                <ul class="rules-list">
+                                    <li data-rule="length" class="rule-item">8 characters or more</li>
+                                    <li data-rule="letter" class="rule-item">a letter</li>
+                                    <li data-rule="number" class="rule-item">a number</li>
+                                    <li data-rule="symbol" class="rule-item">a symbol (! @ # $ % &amp; * _)</li>
+                                </ul>
+                            </div>
                             {% if form.password.errors %}
                                 {% for error in form.password.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
+                                    <div class="text-danger small server-error" data-field="password">{{ error }}</div>
                                 {% endfor %}
                             {% endif %}
                         </div>
+
                         <div class="mb-3">
                             <label for="confirmPassword" class="form-label">Confirm Password</label>
                             <input type="password" id="confirmPassword" name="confirm_password" class="form-control"
@@ -57,11 +73,12 @@
                             </div>
                             {% if form.confirm_password.errors %}
                                 {% for error in form.confirm_password.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
+                                    <div class="text-danger small server-error" data-field="confirm_password">{{ error }}</div>
                                 {% endfor %}
                             {% endif %}
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+
+                        <button id="signupSubmit" type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
                     </form>
                     <p class="text-center mb-0">
                         Already have an account?

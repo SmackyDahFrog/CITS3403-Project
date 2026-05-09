@@ -13,3 +13,47 @@
 .card a:hover {
     color: white;
 }
+
+.password-rules {
+    margin-top: 0.4rem;
+    font-size: 0.85rem;
+}
+
+.password-rules .rules-title {
+    color: #d1d5db;
+    margin-bottom: 0.15rem;
+}
+
+.password-rules .rules-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.password-rules .rule-item {
+    color: #f8d7da;
+    padding-left: 1.1rem;
+    position: relative;
+    transition: opacity 250ms ease, color 250ms ease;
+}
+
+.password-rules .rule-item::before {
+    content: "\2022";
+    position: absolute;
+    left: 0.25rem;
+    color: #dc3545;
+}
+
+.password-rules .rule-item.rule-met {
+    color: #a7f3d0;
+    opacity: 0.55;
+}
+
+.password-rules .rule-item.rule-met::before {
+    content: "\2713";
+    color: #198754;
+}
+
+.username-checking {
+    color: #adb5bd;
+}
