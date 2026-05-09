@@ -30,17 +30,9 @@
                     </div>
                     <div class="mb-4">
                         <label class="form-label">Choose a Profile Picture</label>
-                        <div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
-                            {% for i in range(1, 9) %}
-                            <div class="avatar-option">
-                                <img src="{{ url_for('static', filename='images/avatars/av' ~ i ~ '.png') }}"
-                                    alt="Avatar {{ i }}" width="64" height="64"
-                                    class="rounded-circle border border-2 {% if i == 1 %}selected{% endif %}"
-                                    onclick="selectAvatar(this, 'av{{ i }}')">
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <input type="hidden" id="selectedAvatar" name="avatar" value="av1">
+                        {% with selected_avatar=current_user.avatar or 'av1', field_name='avatar' %}
+                            {% include '_avatar_grid.html' %}
+                        {% endwith %}
                         {% if form.avatar.errors %}
                             {% for error in form.avatar.errors %}
                                 <div class="text-danger small">{{ error }}</div>

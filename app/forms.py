@@ -41,3 +41,32 @@ class CustomisationForm(FlaskForm):
     display_name = StringField('Display Name', validators=[DataRequired(), Length(max=20)])
     avatar = StringField('Avatar', validators=[DataRequired(), Length(max=20)])
     submit = SubmitField('Save')
+
+
+class ChangeDisplayNameForm(FlaskForm):
+    display_name = StringField('Display Name', validators=[DataRequired(), Length(max=20)])
+    # named field so the route can tell which form the user submitted
+    submit_displayname = SubmitField('Save display name')
+
+
+class ChangeAvatarForm(FlaskForm):
+    avatar = StringField('Avatar', validators=[DataRequired(), Length(max=20)])
+    submit_avatar = SubmitField('Save avatar')
+
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField(
+        'New Password',
+        validators=[
+            DataRequired(),
+            Length(min=8, max=32),
+            # mirrors the signup digit rule, the rest is enforced client-side
+            Regexp(r'.*\d.*', message='Password must contain at least one number.'),
+        ],
+    )
+    confirm_new_password = PasswordField(
+        'Confirm New Password',
+        validators=[DataRequired(), EqualTo('new_password', message='Passwords do not match.')],
+    )
+    submit_password = SubmitField('Change password')

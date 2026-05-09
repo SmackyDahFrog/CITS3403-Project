@@ -4,7 +4,14 @@ from datetime import datetime
 from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
 
-from app.forms import CustomisationForm, LoginForm, SignupForm
+from app.forms import (
+    ChangeAvatarForm,
+    ChangeDisplayNameForm,
+    ChangePasswordForm,
+    CustomisationForm,
+    LoginForm,
+    SignupForm,
+)
 from app.models import KaiRun, Score, User, db
 
 main_bp = Blueprint('main', __name__)
@@ -55,6 +62,50 @@ def customisation():
         return redirect(url_for('main.stages'))
 
     return render_template('customisation.html', form=form)
+
+
+@main_bp.route('/settings', methods=['GET', 'POST'])
+@login_required
+def settings():
+    # three independent forms share the page, each has its own submit name
+    form_displayname = ChangeDisplayNameForm()
+    form_avatar = ChangeAvatarForm()
+    form_password = ChangePasswordForm()
+
+    if form_displayname.submit_displayname.data and form_displayname.validate():
+        current_user.display_name = form_displayname.display_name.data
+        db.session.commit()
+        flash('Display name updated.', 'success')
+        return redirect(url_for('main.settings'))
+
+    if form_avatar.submit_avatar.data and form_avatar.validate():
+        current_user.avatar = form_avatar.avatar.data
+        db.session.commit()
+        flash('Avatar updated.', 'success')
+        return redirect(url_for('main.settings'))
+
+    if form_password.submit_password.data and form_password.validate():
+        # current password must match before we touch the hash
+        if not current_user.check_password(form_password.current_password.data):
+            flash('Current password is incorrect.', 'danger')
+        else:
+            current_user.set_password(form_password.new_password.data)
+            db.session.commit()
+            flash('Password changed.', 'success')
+            return redirect(url_for('main.settings'))
+
+    # GET (or a failed POST) renders the page with the user's existing values
+    if not form_displayname.display_name.data:
+        form_displayname.display_name.data = current_user.display_name or ''
+    if not form_avatar.avatar.data:
+        form_avatar.avatar.data = current_user.avatar or 'av1'
+
+    return render_template(
+        'settings.html',
+        form_displayname=form_displayname,
+        form_avatar=form_avatar,
+        form_password=form_password,
+    )
 
 
 @main_bp.route('/stages')

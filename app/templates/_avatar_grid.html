@@ -1,0 +1,44 @@
+{# shared avatar picker, selected_avatar marks which one starts highlighted #}
+<div class="d-flex flex-wrap justify-content-center gap-3 mt-2">
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av1.png') }}" alt="Avatar 1" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av1' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av1')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av2.png') }}" alt="Avatar 2" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av2' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av2')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av3.png') }}" alt="Avatar 3" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av3' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av3')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av4.png') }}" alt="Avatar 4" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av4' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av4')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av5.png') }}" alt="Avatar 5" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av5' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av5')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av6.png') }}" alt="Avatar 6" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av6' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av6')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av7.png') }}" alt="Avatar 7" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av7' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av7')">
+    </div>
+    <div class="avatar-option">
+        <img src="{{ url_for('static', filename='images/avatars/av8.png') }}" alt="Avatar 8" width="64" height="64"
+            class="rounded-circle border border-2{% if selected_avatar == 'av8' %} selected{% endif %}"
+            onclick="selectAvatar(this, 'av8')">
+    </div>
+</div>
+<input type="hidden" id="selectedAvatar" name="{{ field_name }}" value="{{ selected_avatar }}">
