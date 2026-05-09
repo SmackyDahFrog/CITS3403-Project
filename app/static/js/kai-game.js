@@ -16,33 +16,51 @@ const MIN_MAX_R = CURSOR_R_CSS;
 const SHRINK = 0.97;
 // each ball reaches its current max in this many seconds, kept short so the rhythm stays snappy
 const GROW_DURATION_SEC = 0.3;
-// PRESSURE matches the original ballsheet, score depletion grows logarithmically
+// PRESSURE matches the original ballsheet, hunger depletion grows logarithmically
 // with elapsed seconds: pressureRate = PRESSURE * ln(1 + t)
 const PRESSURE = 60;
 const EAT_BONUS = 35;
-const START_SCORE = 100;
+const START_HUNGER = 100;
 
 let canvas, ctx;
 // ballMaxR is the cap for the currently-spawned ball, ballSpawnedAt is when it appeared so
 // the draw loop can interpolate from cursor-sized up to ballMaxR
 let ballX, ballY, ballMaxR, ballSpawnedAt;
-let score, isGameOver;
+let hunger, isGameOver;
+// peak hunger reached this run, used as the bar's denominator so the bar visibly shrinks
+// from peak back down to 0 even when eats have pushed hunger above its starting bank
+let hungerCeiling;
 let lastTick;
+// scoreSubmitted is about the leaderboard time submission, kept distinct from the hunger bar
 let scoreSubmitted = false;
 // pressure only starts after the first successful eat, like the original's noCheese flag
 let pressureActive;
-let pressureStartedAt;
-// frozen end-of-round timestamp, lets the game-over overlay show the exact time survived
-let gameOverAt;
+// accumulated game-clock seconds since pressure started, summed from per-frame dt instead
+// of taken from wall clock so tab-hidden gaps and frame stalls don't inflate the run
+let survivedTimeSec;
+// survivedTimeSec at each eat, used at game over to compute the inter-eat average
+// after dropping any interval shorter than CHAIN_EAT_MIN_MS
+let eatTimes;
+// intervals tighter than this aren't counted toward the average, stops chain-eats on a
+// freshly spawned ball from gaming the per-eat speed metric
+const CHAIN_EAT_MIN_MS = 100;
 // most recent mouse position in canvas coords, null until the cursor first enters the canvas
 let mouseX = null;
 let mouseY = null;
 // css px to canvas px factor, recomputed each mousemove so the cursor hit radius scales with css resizing
 let canvasScale = 1;
+// personal best survived seconds, baked into the canvas data attribute by the server,
+// 0 means no previous run on file so the bar treats this run as a guaranteed record
+let personalBestSec = 0;
 
 function init() {
     canvas = document.getElementById('kaiCanvas');
     ctx = canvas.getContext('2d');
+
+    // data attribute is in milliseconds (matches what's stored in the scores table), the
+    // bar logic wants seconds so divide once on load instead of every draw call
+    const pbMs = parseInt(canvas.dataset.personalBest || '0', 10);
+    personalBestSec = isNaN(pbMs) ? 0 : pbMs / 1000;
 
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseleave', onMouseLeave);
@@ -58,13 +76,14 @@ function init() {
 }
 
 function gameSetup() {
-    score = START_SCORE;
+    hunger = START_HUNGER;
+    hungerCeiling = START_HUNGER;
     ballMaxR = START_MAX_R;
     isGameOver = false;
     scoreSubmitted = false;
     pressureActive = false;
-    pressureStartedAt = 0;
-    gameOverAt = 0;
+    survivedTimeSec = 0;
+    eatTimes = [];
     spawnBall();
     lastTick = performance.now();
 }
@@ -106,9 +125,14 @@ function update(dt) {
             // first eat starts the pressure clock, like the original's noCheese
             if (!pressureActive) {
                 pressureActive = true;
-                pressureStartedAt = performance.now();
             }
-            score += EAT_BONUS;
+            // record the moment of this eat in game-clock seconds, the gameover summary
+            // averages the gaps between consecutive eats and drops any tighter than 100ms
+            eatTimes.push(survivedTimeSec);
+            hunger += EAT_BONUS;
+            // peak hunger this run sets the bar's denominator, so an eat that pushes
+            // hunger above the previous high refills the bar back to a full strip
+            if (hunger > hungerCeiling) hungerCeiling = hunger;
             // shrink the cap for the next ball, the floor stops it disappearing entirely
             ballMaxR = Math.max(MIN_MAX_R, ballMaxR * SHRINK);
             spawnBall();
@@ -118,13 +142,16 @@ function update(dt) {
     // pressure only ticks once the first ball has been eaten
     if (!pressureActive) return;
 
-    // logarithmic depletion, same model as the original ballsheet
-    const elapsed = (performance.now() - pressureStartedAt) / 1000;
-    const pressureRate = PRESSURE * Math.log(1 + elapsed);
-    score -= pressureRate * dt;
+    // accumulate game-clock seconds from this frame's dt, decoupled from wall clock so
+    // tab-hidden gaps don't sneak time into the survival timer or the pressure rate
+    survivedTimeSec += dt;
 
-    if (score <= 0) {
-        score = 0;
+    // logarithmic depletion, same model as the original ballsheet
+    const pressureRate = PRESSURE * Math.log(1 + survivedTimeSec);
+    hunger -= pressureRate * dt;
+
+    if (hunger <= 0) {
+        hunger = 0;
         gameOver();
     }
 }
@@ -141,19 +168,19 @@ function draw() {
         ctx.arc(ballX, ballY, currentBallR(), 0, Math.PI * 2);
         ctx.fill();
 
-        // pressure gauge along the bottom of the playfield
-        drawPressureBar();
+        // hunger gauge along the bottom of the playfield
+        drawHungerBar();
     }
 
-    // top-left readouts, the time survived is the metric that gets submitted as the score,
-    // the point bank below it is just the visible "you are about to die" indicator
+    // top-left readouts, the time survived is the metric that gets submitted to the leaderboard,
+    // the hunger bank below it is just the visible "you are about to die" indicator
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.font = '28px Arial, sans-serif';
     ctx.fillText('Time: ' + survivedSeconds().toFixed(2) + 's', 12, 12);
     ctx.font = '18px Arial, sans-serif';
-    ctx.fillText('Score: ' + Math.floor(score), 12, 46);
+    ctx.fillText('Hunger: ' + Math.floor(hunger), 12, 46);
 
     if (isGameOver) {
         // overlay with final time and restart prompt
@@ -172,66 +199,61 @@ function draw() {
     }
 }
 
-// pressure rate caps the bar at full red, picked so the marker spans most of the bar over a typical run
-const MAX_DISPLAY_PRESSURE = 250;
-// segment dividers along the gauge, one extra to give a sense of pressure beyond the four colour stops
-const PRESSURE_BAR_SEGMENTS = 11;
+// four discrete colour bands keyed off the survived-time-vs-best ratio. thresholds are
+// uneven on purpose: red is just the brief opening sliver, yellow covers most of the run
+// up to "almost matching the personal best", green is reserved for the final approach and
+// anything past best. tuned so a typical run that reaches ~40% of best already shows three
+// distinct colours rather than parking on red while the ratio crawls up
+const HUNGER_BAR_BANDS = [
+    { upTo: 0.10,     rgb: [0xff, 0x41, 0x36] }, // red, just the opening blip
+    { upTo: 0.35,     rgb: [0xff, 0x85, 0x1b] }, // orange, warming up
+    { upTo: 0.90,     rgb: [0xff, 0xdc, 0x00] }, // yellow, on the climb toward best
+    { upTo: Infinity, rgb: [0x2e, 0xcc, 0x40] }, // green, on pace with or past the personal best
+];
 
-function drawPressureBar() {
-    const barH = 8;
+// pick the band that t falls inside, returning a solid rgb string for the canvas fillStyle
+function colourAtPosition(t) {
+    for (const band of HUNGER_BAR_BANDS) {
+        if (t < band.upTo) return `rgb(${band.rgb.join(',')})`;
+    }
+    // unreachable since the last band is Infinity, kept as a safety fallback
+    return `rgb(${HUNGER_BAR_BANDS[HUNGER_BAR_BANDS.length - 1].rgb.join(',')})`;
+}
+
+function drawHungerBar() {
+    // thin strip across the bottom, length itself is the gauge so no separate marker is needed
+    const barH = 4;
     const barX = 30;
-    const barW = W - barX * 2;
-    // sit a pixel above the bottom edge of the canvas, the css border lives outside this area
+    const barFullW = W - barX * 2;
     const barY = H - barH - 1;
 
-    // red on the left, orange, yellow, green on the right; the marker starts at the
-    // green end and descends leftward toward red as pressure builds
-    const gradient = ctx.createLinearGradient(barX, 0, barX + barW, 0);
-    gradient.addColorStop(0.0, '#ff4136');
-    gradient.addColorStop(1 / 3, '#ff851b');
-    gradient.addColorStop(2 / 3, '#ffdc00');
-    gradient.addColorStop(1.0, '#2ecc40');
-    ctx.fillStyle = gradient;
-    ctx.fillRect(barX, barY, barW, barH);
+    // bar length tracks remaining hunger relative to this run's peak, anchored on the left
+    // so the right edge recedes as pressure depletes hunger and the bar vanishes at hunger=0
+    const fillRatio = hungerCeiling > 0 ? Math.max(0, Math.min(1, hunger / hungerCeiling)) : 0;
+    const visibleW = barFullW * fillRatio;
+    if (visibleW <= 0) return;
 
-    // thin segment dividers, the +0.5 offset keeps single-pixel lines crisp on most displays
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.55)';
-    ctx.lineWidth = 1;
-    for (let i = 1; i < PRESSURE_BAR_SEGMENTS; i++) {
-        const x = Math.round(barX + (barW * i) / PRESSURE_BAR_SEGMENTS) + 0.5;
-        ctx.beginPath();
-        ctx.moveTo(x, barY);
-        ctx.lineTo(x, barY + barH);
-        ctx.stroke();
+    // colour position runs the four-stop ramp using current survival time vs the personal
+    // best: 0 = far below best (red), 1 = matching or beating best (green). before the first
+    // eat there's nothing meaningful to compare so default to green, same on a first ever run
+    let colourPosition = 1;
+    if (pressureActive && personalBestSec > 0) {
+        colourPosition = Math.max(0, Math.min(1, survivedSeconds() / personalBestSec));
     }
-
-    // outline so the gauge reads as a contained widget rather than a painted strip
-    ctx.strokeStyle = '#d9d9d9';
-    ctx.strokeRect(barX + 0.5, barY + 0.5, barW - 1, barH - 1);
-
-    // marker rides the bar from no-pressure (right, green) to capped (left, red),
-    // so it starts pinned right and descends through the colours as pressure rises
-    const elapsed = pressureActive ? (performance.now() - pressureStartedAt) / 1000 : 0;
-    const pressureRate = PRESSURE * Math.log(1 + elapsed);
-    const fill = Math.min(1, pressureRate / MAX_DISPLAY_PRESSURE);
-    const markerX = Math.round(barX + barW * (1 - fill));
-
-    // white block with a thin dark outline so it stays visible across every colour band
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(markerX - 2, barY - 3, 4, barH + 6);
-    ctx.strokeStyle = '#000000';
-    ctx.strokeRect(markerX - 2.5, barY - 3.5, 5, barH + 7);
+    ctx.fillStyle = colourAtPosition(colourPosition);
+    ctx.fillRect(barX, barY, visibleW, barH);
 }
 
 // seconds elapsed since the first eat, the original ballsheet's high-score metric
 function survivedSeconds() {
-    if (!pressureActive) return 0;
-    const endRef = isGameOver ? gameOverAt : performance.now();
-    return (endRef - pressureStartedAt) / 1000;
+    return survivedTimeSec;
 }
 
 function gameLoop(now) {
-    const dt = (now - lastTick) / 1000;
+    // cap dt so a tab-switch, sleep, or frame stall can't fast-forward the run on resume.
+    // 0.1s is much larger than a normal frame (~0.016s) so it's invisible during smooth play
+    let dt = (now - lastTick) / 1000;
+    if (dt > 0.1) dt = 0.1;
     lastTick = now;
     update(dt);
     draw();
@@ -261,32 +283,53 @@ function onKeyDown(e) {
     }
 }
 
+// average milliseconds between eats over the run, after dropping any inter-eat gap
+// shorter than CHAIN_EAT_MIN_MS so a flurry of chain-eats can't deflate the average
+function computeAvgEatMs() {
+    if (eatTimes.length < 2) return 0;
+    const minSec = CHAIN_EAT_MIN_MS / 1000;
+    let total = 0;
+    let count = 0;
+    for (let i = 1; i < eatTimes.length; i++) {
+        const gap = eatTimes[i] - eatTimes[i - 1];
+        if (gap >= minSec) {
+            total += gap;
+            count += 1;
+        }
+    }
+    if (count === 0) return 0;
+    return Math.round((total / count) * 1000);
+}
+
 function gameOver() {
     isGameOver = true;
-    // freeze the end timestamp so the overlay and the submitted value agree exactly
-    gameOverAt = performance.now();
     // submit once per round, R-restart resets the flag in gameSetup
     if (!scoreSubmitted) {
         scoreSubmitted = true;
-        // submitted value is milliseconds survived since the first eat, matches the original game's high-score metric
-        const survivedMs = pressureStartedAt > 0 ? gameOverAt - pressureStartedAt : 0;
-        postScore(Math.floor(survivedMs));
+        // submitted values are milliseconds of accumulated game-clock survival plus per-eat
+        // pacing, both ignore any time spent with the tab hidden thanks to survivedTimeSec
+        const survivedMs = Math.round(survivedTimeSec * 1000);
+        const avgEatMs = computeAvgEatMs();
+        // bump the in-memory best so the next round's bar colour compares against this run
+        // without needing a page refresh to pull the freshly written DB value back down
+        if (survivedTimeSec > personalBestSec) personalBestSec = survivedTimeSec;
+        postKaiRun(survivedMs, avgEatMs, eatTimes.length);
     }
 }
 
-function postScore(value) {
+function postKaiRun(timeMs, avgEatMs, eatCount) {
     // CSRFProtect is on globally, the token lives in a meta tag rendered by Jinja
     const meta = document.querySelector('meta[name="csrf-token"]');
     const token = meta ? meta.getAttribute('content') : '';
 
-    fetch('/api/scores', {
+    fetch('/api/kai/runs', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': token
         },
-        // server reads game + value, user comes from the session
-        body: JSON.stringify({ game: 'kai', value: value })
+        // structured payload, the server reads each field, user comes from the session
+        body: JSON.stringify({ time_ms: timeMs, avg_eat_ms: avgEatMs, eat_count: eatCount })
     }).catch(() => {
         // network errors aren't fatal here, the player can still see their score and retry
     });

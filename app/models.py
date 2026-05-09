@@ -45,3 +45,25 @@ class Score(db.Model):
 
     def __repr__(self):
         return f'<Score {self.game}:{self.value} user={self.user_id}>'
+
+
+class KaiRun(db.Model):
+    # per-game table, one row per Snack-Time playthrough. other games will get their own
+    # table each, the legacy scores table sticks around for the games that haven't migrated yet
+    __tablename__ = 'kai_runs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # total survival time in milliseconds, the leaderboard metric
+    time_ms = db.Column(db.Integer, nullable=False)
+    # average milliseconds between eats. eats happening within 100 ms of the previous one
+    # don't contribute, so chain-eats on a freshly spawned ball can't drag the average down
+    avg_eat_ms = db.Column(db.Integer, nullable=False, default=0)
+    # raw eat count, kept for context even though the average filters some of these out
+    eat_count = db.Column(db.Integer, nullable=False, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='kai_runs')
+
+    def __repr__(self):
+        return f'<KaiRun time={self.time_ms}ms avg_eat={self.avg_eat_ms}ms user={self.user_id}>'

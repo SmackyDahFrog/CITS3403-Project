@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/kai.css') }}">
-    <title>Kai's Game</title>
+    <title>Snack-Time</title>
 </head>
 
 <body class="min-vh-100 d-flex flex-column">
@@ -44,26 +44,26 @@
 </nav>
 
     <div class="container py-4">
-        <h1 class="text-center mb-2">Kai's Game</h1>
+        <h1 class="text-center mb-2">Snack-Time</h1>
         <p class="text-center text-secondary mb-4">
             Glide your cursor over the ball to eat it. Each eat shrinks the next one.
         </p>
         <div class="d-flex flex-column align-items-center">
             <div class="kai-stage">
-                <canvas id="kaiCanvas" width="1000" height="600"></canvas>
+                <canvas id="kaiCanvas" width="1000" height="600" data-personal-best="{{ personal_best or 0 }}"></canvas>
                 <div class="kai-too-small" role="status">
                     <p class="mb-2 fw-bold">Window too narrow</p>
-                    <p class="mb-0">Resize your window wider to play Kai's Game.</p>
+                    <p class="mb-0">Resize your window wider to play Snack-Time.</p>
                 </div>
             </div>
             <button id="restartBtn" class="btn btn-light mt-3">Restart (R)</button>
             <div class="kai-leaderboard mt-4">
                 <h3 class="text-center">Top 3</h3>
                 <ol class="list-group">
-                    {% for score, user in top_scores %}
+                    {% for run, user in top_scores %}
                     <li class="list-group-item bg-dark text-white d-flex justify-content-between">
                         <span>{{ user.display_name or user.username }}</span>
-                        <span>{{ '%.2f'|format(score.value / 1000) }}s</span>
+                        <span>{{ '%.2f'|format(run.time_ms / 1000) }}s</span>
                     </li>
                     {% else %}
                     <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
@@ -77,7 +77,7 @@
         integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I"
         crossorigin="anonymous"></script>
     <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/kai-game.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/kai-game.js') }}?v={{ js_version }}"></script>
 </body>
 
 </html>
