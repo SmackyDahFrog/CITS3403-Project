@@ -170,12 +170,12 @@ function draw() {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
     ctx.font = '28px Arial, sans-serif';
-    ctx.fillText('Time: ' + survivedSeconds().toFixed(2) + 's', 12, 12);
+    ctx.fillText('Time: ' + survivedSeconds().toFixed(3) + 's', 12, 12);
     ctx.font = '18px Arial, sans-serif';
     ctx.fillText('Hunger: ' + Math.floor(hunger), 12, 46);
 
     if (isGameOver) {
-        // overlay with final time and restart prompt
+        // overlay with final time, per-eat pace, and restart prompt
         ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.fillRect(0, 0, W, H);
 
@@ -183,11 +183,18 @@ function draw() {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '48px Arial, sans-serif';
-        ctx.fillText('Game Over', W / 2, H / 2 - 40);
+        ctx.fillText('Game Over', W / 2, H / 2 - 60);
         ctx.font = '28px Arial, sans-serif';
-        ctx.fillText('You survived ' + survivedSeconds().toFixed(2) + 's', W / 2, H / 2 + 10);
+        ctx.fillText('You survived ' + survivedSeconds().toFixed(3) + 's', W / 2, H / 2 - 15);
+        // pace line, only when there's at least one inter-eat gap that wasn't a chain-eat,
+        // otherwise the figure would just be 0 and read as misleading
+        const finalAvgMs = computeAvgEatMs();
+        if (finalAvgMs > 0) {
+            ctx.font = '22px Arial, sans-serif';
+            ctx.fillText((finalAvgMs / 1000).toFixed(3) + 's/munch', W / 2, H / 2 + 20);
+        }
         ctx.font = '20px Arial, sans-serif';
-        ctx.fillText('Press R or Space to restart', W / 2, H / 2 + 50);
+        ctx.fillText('Press R or Space to restart', W / 2, H / 2 + 60);
     }
 }
 
@@ -312,6 +319,13 @@ function postKaiRun(timeMs, avgEatMs, eatCount) {
         },
         // structured payload, the server reads each field, user comes from the session
         body: JSON.stringify({ time_ms: timeMs, avg_eat_ms: avgEatMs, eat_count: eatCount })
+    }).then(res => res.json()).then(data => {
+        // if the server says this run is the user's new best, give them a couple seconds
+        // on the game-over screen and then reload so the leaderboard and the Your Best
+        // panel both pick up the freshly-saved row from the server-rendered HTML
+        if (data && data.is_new_best) {
+            setTimeout(() => window.location.reload(), 2000);
+        }
     }).catch(() => {
         // network errors aren't fatal here, the player can still see their score and retry
     });

@@ -79,10 +79,18 @@ def play_kai():
             .limit(3)
             .all()
     )
+    # the current user's own best, shown in a separate "Your Best" panel even when they
+    # aren't in the top 3, so a subpar run still updates a visible record after reload
+    personal_run = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
     # cache-buster so iterating on kai-game.js during dev doesn't get clobbered by stale browser caches
     js_path = os.path.join(current_app.static_folder, 'js', 'kai-game.js')
     js_version = int(os.path.getmtime(js_path))
-    return render_template('games/kai.html', top_scores=top_scores, js_version=js_version)
+    return render_template(
+        'games/kai.html',
+        top_scores=top_scores,
+        personal_run=personal_run,
+        js_version=js_version,
+    )
 
 
 @main_bp.route('/api/scores', methods=['POST'])
@@ -133,6 +141,7 @@ def api_save_kai_run():
         return jsonify(ok=False, error='invalid payload'), 400
 
     existing = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
+    is_new_best = False
     if existing is None:
         db.session.add(KaiRun(
             user_id=current_user.id,
@@ -141,6 +150,7 @@ def api_save_kai_run():
             eat_count=eat_count,
         ))
         db.session.commit()
+        is_new_best = True
     elif _kai_run_is_better(time_ms, avg_eat_ms, existing.time_ms, existing.avg_eat_ms):
         existing.time_ms = time_ms
         existing.avg_eat_ms = avg_eat_ms
@@ -148,7 +158,10 @@ def api_save_kai_run():
         # created_at tracks when the current best was set, refresh it on every overwrite
         existing.created_at = datetime.utcnow()
         db.session.commit()
-    return jsonify(ok=True)
+        is_new_best = True
+    # client uses is_new_best to decide whether to reload the page so the leaderboard and
+    # the Your Best panel reflect the freshly-saved row
+    return jsonify(ok=True, is_new_best=is_new_best)
 
 
 @main_bp.route('/logout')

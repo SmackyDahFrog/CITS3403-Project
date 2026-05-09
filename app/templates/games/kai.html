@@ -63,12 +63,28 @@
                     {% for run, user in top_scores %}
                     <li class="list-group-item bg-dark text-white d-flex justify-content-between">
                         <span>{{ user.display_name or user.username }}</span>
-                        <span>{{ '%.2f'|format(run.time_ms / 1000) }}s</span>
+                        <span>
+                            {{ '%.3f'|format(run.time_ms / 1000) }}s{% if run.avg_eat_ms %} &middot; {{ '%.3f'|format(run.avg_eat_ms / 1000) }}s/munch{% endif %}
+                        </span>
                     </li>
                     {% else %}
                     <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
                     {% endfor %}
                 </ol>
+
+                <h3 class="text-center mt-4">Your Best</h3>
+                <ul class="list-group">
+                    {% if personal_run %}
+                    <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                        <span>{{ current_user.display_name or current_user.username }}</span>
+                        <span>
+                            {{ '%.3f'|format(personal_run.time_ms / 1000) }}s{% if personal_run.avg_eat_ms %} &middot; {{ '%.3f'|format(personal_run.avg_eat_ms / 1000) }}s/munch{% endif %}
+                        </span>
+                    </li>
+                    {% else %}
+                    <li class="list-group-item bg-dark text-white">No run yet, play to set your best.</li>
+                    {% endif %}
+                </ul>
             </div>
         </div>
     </div>
