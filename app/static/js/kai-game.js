@@ -49,18 +49,10 @@ let mouseX = null;
 let mouseY = null;
 // css px to canvas px factor, recomputed each mousemove so the cursor hit radius scales with css resizing
 let canvasScale = 1;
-// personal best survived seconds, baked into the canvas data attribute by the server,
-// 0 means no previous run on file so the bar treats this run as a guaranteed record
-let personalBestSec = 0;
 
 function init() {
     canvas = document.getElementById('kaiCanvas');
     ctx = canvas.getContext('2d');
-
-    // data attribute is in milliseconds (matches what's stored in the scores table), the
-    // bar logic wants seconds so divide once on load instead of every draw call
-    const pbMs = parseInt(canvas.dataset.personalBest || '0', 10);
-    personalBestSec = isNaN(pbMs) ? 0 : pbMs / 1000;
 
     canvas.addEventListener('mousemove', onMouseMove);
     canvas.addEventListener('mouseleave', onMouseLeave);
@@ -199,16 +191,14 @@ function draw() {
     }
 }
 
-// four discrete colour bands keyed off the survived-time-vs-best ratio. thresholds are
-// uneven on purpose: red is just the brief opening sliver, yellow covers most of the run
-// up to "almost matching the personal best", green is reserved for the final approach and
-// anything past best. tuned so a typical run that reaches ~40% of best already shows three
-// distinct colours rather than parking on red while the ratio crawls up
+// four colour bands keyed off the bar's own fill ratio, with green held back to the top
+// 20% so it reads as "actually doing well" rather than the default. red and orange split
+// the lower half evenly as a warning, yellow covers the broad middle from half to 80%
 const HUNGER_BAR_BANDS = [
-    { upTo: 0.10,     rgb: [0xff, 0x41, 0x36] }, // red, just the opening blip
-    { upTo: 0.35,     rgb: [0xff, 0x85, 0x1b] }, // orange, warming up
-    { upTo: 0.90,     rgb: [0xff, 0xdc, 0x00] }, // yellow, on the climb toward best
-    { upTo: Infinity, rgb: [0x2e, 0xcc, 0x40] }, // green, on pace with or past the personal best
+    { upTo: 0.25,     rgb: [0xff, 0x41, 0x36] }, // red, hunger almost gone
+    { upTo: 0.50,     rgb: [0xff, 0x85, 0x1b] }, // orange, running low
+    { upTo: 0.80,     rgb: [0xff, 0xdc, 0x00] }, // yellow, the warning middle
+    { upTo: Infinity, rgb: [0x2e, 0xcc, 0x40] }, // green, only above 80% full
 ];
 
 // pick the band that t falls inside, returning a solid rgb string for the canvas fillStyle
@@ -233,14 +223,9 @@ function drawHungerBar() {
     const visibleW = barFullW * fillRatio;
     if (visibleW <= 0) return;
 
-    // colour position runs the four-stop ramp using current survival time vs the personal
-    // best: 0 = far below best (red), 1 = matching or beating best (green). before the first
-    // eat there's nothing meaningful to compare so default to green, same on a first ever run
-    let colourPosition = 1;
-    if (pressureActive && personalBestSec > 0) {
-        colourPosition = Math.max(0, Math.min(1, survivedSeconds() / personalBestSec));
-    }
-    ctx.fillStyle = colourAtPosition(colourPosition);
+    // colour also reads off the same fill ratio: each 25% quartile gets one solid band so
+    // the strip drifts from green through yellow and orange to red as hunger drains
+    ctx.fillStyle = colourAtPosition(fillRatio);
     ctx.fillRect(barX, barY, visibleW, barH);
 }
 
@@ -310,9 +295,6 @@ function gameOver() {
         // pacing, both ignore any time spent with the tab hidden thanks to survivedTimeSec
         const survivedMs = Math.round(survivedTimeSec * 1000);
         const avgEatMs = computeAvgEatMs();
-        // bump the in-memory best so the next round's bar colour compares against this run
-        // without needing a page refresh to pull the freshly written DB value back down
-        if (survivedTimeSec > personalBestSec) personalBestSec = survivedTimeSec;
         postKaiRun(survivedMs, avgEatMs, eatTimes.length);
     }
 }

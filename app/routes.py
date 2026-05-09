@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user, logout_user
@@ -67,24 +68,21 @@ def stages():
 @main_bp.route('/play/kai')
 @login_required
 def play_kai():
-    # top 3 kai runs for the panel below the canvas, joined with users for display name fallback
+    # one row per user, ordered by survival time then by avg-eat-ms ascending as a tiebreak.
+    # avg_eat_ms = 0 means there were no inter-eat gaps long enough to count, so push those
+    # rows to the bottom of any tie rather than letting a "no data" zero rank above real avgs
+    avg_eat_no_data = db.case((KaiRun.avg_eat_ms == 0, 1), else_=0)
     top_scores = (
         db.session.query(KaiRun, User)
             .join(User, KaiRun.user_id == User.id)
-            .order_by(KaiRun.time_ms.desc())
+            .order_by(KaiRun.time_ms.desc(), avg_eat_no_data.asc(), KaiRun.avg_eat_ms.asc())
             .limit(3)
             .all()
     )
-    # current player's personal best, in ms, drives the live hunger-bar colour client side
-    personal_best = (
-        db.session.query(db.func.max(KaiRun.time_ms))
-            .filter(KaiRun.user_id == current_user.id)
-            .scalar()
-    ) or 0
     # cache-buster so iterating on kai-game.js during dev doesn't get clobbered by stale browser caches
     js_path = os.path.join(current_app.static_folder, 'js', 'kai-game.js')
     js_version = int(os.path.getmtime(js_path))
-    return render_template('games/kai.html', top_scores=top_scores, personal_best=personal_best, js_version=js_version)
+    return render_template('games/kai.html', top_scores=top_scores, js_version=js_version)
 
 
 @main_bp.route('/api/scores', methods=['POST'])
@@ -109,11 +107,23 @@ def _is_nonneg_int(v):
     return isinstance(v, int) and not isinstance(v, bool) and v >= 0
 
 
+def _kai_run_is_better(new_time, new_avg, old_time, old_avg):
+    # primary: a longer survival time always wins outright
+    if new_time != old_time:
+        return new_time > old_time
+    # tie on time, fall back to per-eat pacing: lower avg ms is better, treat 0 ("no
+    # qualifying eat gaps recorded") as worst so a real measured average always beats it
+    new_cmp = new_avg if new_avg > 0 else float('inf')
+    old_cmp = old_avg if old_avg > 0 else float('inf')
+    return new_cmp < old_cmp
+
+
 @main_bp.route('/api/kai/runs', methods=['POST'])
 @login_required
 def api_save_kai_run():
-    # kai-specific endpoint, takes the structured run payload that the legacy /api/scores
-    # couldn't carry. one row per game over, written into kai_runs
+    # kai-specific endpoint, each user keeps a single best-run row in kai_runs that gets
+    # overwritten only when the new run beats it on time, or ties on time with a better
+    # (lower) inter-eat average. weaker runs are silently dropped, the request still 200s
     data = request.get_json(silent=True) or {}
     time_ms = data.get('time_ms')
     avg_eat_ms = data.get('avg_eat_ms', 0)
@@ -122,13 +132,22 @@ def api_save_kai_run():
     if not (_is_nonneg_int(time_ms) and _is_nonneg_int(avg_eat_ms) and _is_nonneg_int(eat_count)):
         return jsonify(ok=False, error='invalid payload'), 400
 
-    db.session.add(KaiRun(
-        user_id=current_user.id,
-        time_ms=time_ms,
-        avg_eat_ms=avg_eat_ms,
-        eat_count=eat_count,
-    ))
-    db.session.commit()
+    existing = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
+    if existing is None:
+        db.session.add(KaiRun(
+            user_id=current_user.id,
+            time_ms=time_ms,
+            avg_eat_ms=avg_eat_ms,
+            eat_count=eat_count,
+        ))
+        db.session.commit()
+    elif _kai_run_is_better(time_ms, avg_eat_ms, existing.time_ms, existing.avg_eat_ms):
+        existing.time_ms = time_ms
+        existing.avg_eat_ms = avg_eat_ms
+        existing.eat_count = eat_count
+        # created_at tracks when the current best was set, refresh it on every overwrite
+        existing.created_at = datetime.utcnow()
+        db.session.commit()
     return jsonify(ok=True)
 
 
