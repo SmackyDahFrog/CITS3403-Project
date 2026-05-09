@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect
 from dotenv import load_dotenv
 
-from app.config import Config
+from app.config import DevelopmentConfig
 from app.models import db, User
 
 load_dotenv()
@@ -15,7 +15,7 @@ migrate = Migrate()
 csrf = CSRFProtect()
 
 
-def create_app(config_class=Config):
+def create_app(config_class=DevelopmentConfig):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
