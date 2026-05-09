@@ -9,10 +9,8 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/', methods=['GET', 'POST'])
 def login():
-    # already authenticated users skip the login screen
     if current_user.is_authenticated:
         return redirect(url_for('main.stages'))
-
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
@@ -20,7 +18,7 @@ def login():
             login_user(user)
             return redirect(url_for('main.stages'))
         flash('Invalid username or password.', 'danger')
-
+        return redirect(url_for('main.login'))
     return render_template('MainPage.html', form=form)
 
 

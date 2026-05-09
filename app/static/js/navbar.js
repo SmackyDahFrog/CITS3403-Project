@@ -1,23 +1,7 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const displayName = sessionStorage.getItem('displayName') || 'Player';
-    const avatar = sessionStorage.getItem('avatar') || null;
+// navbar.js — dropdown is handled by Bootstrap JS automatically.
+// User data is injected server-side via Jinja2, no sessionStorage needed.
 
-    const navDisplayName = document.getElementById('navDisplayName');
-    if (navDisplayName) {
-        navDisplayName.textContent = displayName;
-    }
-
-    const navProfileDisplay = document.getElementById('navProfileDisplay');
-    if (navProfileDisplay) {
-        if (avatar) {
-            navProfileDisplay.innerHTML = `<img src="avatars/${avatar}.png" alt="Profile">`;
-        } else {
-            navProfileDisplay.textContent = displayName.charAt(0).toUpperCase();
-        }
-    }
-});
-
+// Legacy logout handler kept for any old references, but logout now uses Flask route directly.
 function handleLogout() {
-    sessionStorage.clear();
-    window.location.href = 'MainPage.html';
+    window.location.href = '/logout';
 }
