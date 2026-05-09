@@ -1,4 +1,6 @@
 .profile-navbar {
+    position: relative;
+    z-index: 1050;
     background-color: #161616;
     border-bottom: 1px solid #333;
     padding: 0.6rem 1.5rem;
