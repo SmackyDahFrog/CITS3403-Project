@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RNG Tic</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/ticTacToe.css') }}">
+</head>
+<body>
+    <div class="page-frame">
+        <header class="tttHeader">
+            <h1>RNG Tic-Tac-Toe</h1>
+        </header>
+ 
+        <main class="tttBoard">
+            <button class="tttCell" data-index="0"></button>
+            <button class="tttCell" data-index="1"></button>
+            <button class="tttCell" data-index="2"></button>
+            <button class="tttCell" data-index="3"></button>
+            <button class="tttCell" data-index="4"></button>
+            <button class="tttCell" data-index="5"></button>
+            <button class="tttCell" data-index="6"></button>
+            <button class="tttCell" data-index="7"></button>
+            <button class="tttCell" data-index="8"></button>
+        </main>
+ 
+        <div class="tttControls">
+            <a href="{{ url_for('main.stages') }}"><button type="button">Back to Stages</button></a>
+        </div>
+    </div>
+ 
+    <script src="{{ url_for('static', filename='js/gameLogic.js') }}"></script>
+</body>
+</html>
