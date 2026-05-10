@@ -1,11 +1,12 @@
 .tttHeader {
     text-align: center;
-    font-size: 4rem;
+    font-size: 2.5rem;
     margin: 0 0 10px 0;
 }
 
 .tttSubtitle {
     text-align: center;
+    color: #6c757d;
     margin-bottom: 30px;
 }
  
