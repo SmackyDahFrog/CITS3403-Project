@@ -100,3 +100,7 @@ function resetGame() {
 }
 
 document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'r' || e.key === 'R') resetGame();
+});
