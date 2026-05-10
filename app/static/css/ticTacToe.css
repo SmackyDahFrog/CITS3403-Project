@@ -1,11 +1,12 @@
 .tttHeader {
     text-align: center;
-    margin-bottom: 30px;
-}
- 
-.tttHeader h1 {
     font-size: 4rem;
     margin: 0 0 10px 0;
+}
+
+.tttSubtitle {
+    text-align: center;
+    margin-bottom: 30px;
 }
  
 .tttControls {
