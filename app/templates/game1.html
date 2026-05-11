@@ -14,7 +14,7 @@
         <div class="container py-4 text-center">
             <!--Instructions-->
             <h1>Where's Wilson?</h1>
-            <p>Find Wilson as fast as you can, by clicking on him!</p>
+            <p>Find Wilson as fast as you can by clicking on him!</p>
             <p id="timer">Time: 0.00s</p>
 
             <div class="game-area">
@@ -26,6 +26,9 @@
                     <div class="overlay-content text-center">
                         <p class="mb-3">Press Start when you're ready!</p>
                         <button id="start-button" class="btn btn-light">Start</button>
+                        <div class="mt-2">
+                            <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
+                        </div>
                     </div>
                 </div>
 
@@ -33,6 +36,9 @@
                     <div class="overlay-content text-center">
                         <p id="result-message" class="mb-3"></p>
                         <button id="play-again-button" class="btn btn-light">Play Again</button>
+                        <div class="mt-2">
+                            <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
+                        </div>
                     </div>
                 </div>
 
