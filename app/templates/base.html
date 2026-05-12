@@ -12,7 +12,6 @@
 </head>
 <body class="min-vh-100 d-flex flex-column">
 
-    <!-- ===== TOP NAVBAR ===== -->
     <nav class="profile-navbar">
 
         <!-- Hamburger: opens offcanvas sidebar -->
@@ -84,7 +83,6 @@
         </div>
     </nav>
 
-    <!-- ===== OFFCANVAS SIDEBAR ===== -->
     <div class="offcanvas offcanvas-start"
          tabindex="-1"
          id="sidebarMenu"
@@ -132,7 +130,7 @@
                 </li>
             </ul>
 
-            <!-- Account section — pinned to bottom, logged-in users only -->
+            <!-- Account section pinned to bottom, logged-in users only -->
             {% if current_user.is_authenticated %}
             <ul class="sidebar-nav sidebar-nav-bottom">
                 <li><hr class="sidebar-divider"></li>
@@ -162,7 +160,6 @@
         </div>
     </div>
 
-    <!-- ===== FLASH MESSAGES ===== -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             <div class="container mt-2">
