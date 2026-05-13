@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>RNG Tic</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/ticTacToe.css') }}">
 </head>
@@ -11,7 +14,8 @@
     <div class="page-frame">
         <h1 class="tttHeader">RNG Tic-Tac-Toe</h1>
         <p class="tttSubtitle">Verse a computer in Tic-Tac-Toe, where it plays optimally. It will sometimes make a random move, so use that as a chance to win!</p>
- 
+        <p id="tttTimer" class="tttTimer">0.000s</p>
+
         <main class="tttBoard">
             <button class="tttCell" data-index="0"></button>
             <button class="tttCell" data-index="1"></button>
@@ -23,13 +27,41 @@
             <button class="tttCell" data-index="7"></button>
             <button class="tttCell" data-index="8"></button>
         </main>
- 
+
         <div class="tttControls">
             <button type="button" id="resetBtn" class="ttt-btn-light">Restart (R)</button>
             <a href="{{ url_for('main.stages') }}" class="ttt-btn-outline-light">Back to Stages</a>
         </div>
+
+        <div class="ttt-leaderboard mt-4">
+            <h3 class="text-center">Top 3</h3>
+            <ol class="list-group">
+                {% for run, user in top_scores %}
+                <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                    <span>{{ user.display_name or user.username }}</span>
+                    <span>{{ '%.3f'|format(run.best_win_ms / 1000) }}s &middot; {{ run.wins }}W {{ run.draws }}D {{ run.losses }}L</span>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white">No wins yet, be the first.</li>
+                {% endfor %}
+            </ol>
+
+            <h3 class="text-center mt-4">Your Best</h3>
+            <ul class="list-group">
+                {% if personal_run %}
+                <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                    <span>{{ current_user.display_name or current_user.username }}</span>
+                    <span>
+                        {% if personal_run.best_win_ms %}{{ '%.3f'|format(personal_run.best_win_ms / 1000) }}s &middot; {% endif %}{{ personal_run.wins }}W {{ personal_run.draws }}D {{ personal_run.losses }}L
+                    </span>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white">No games yet, play to set your record.</li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
- 
+
     <script src="{{ url_for('static', filename='js/gameLogic.js') }}"></script>
 </body>
 </html>
