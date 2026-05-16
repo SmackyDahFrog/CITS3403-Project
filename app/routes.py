@@ -14,7 +14,7 @@ from app.forms import (
     LoginForm,
     SignupForm,
 )
-from app.models import KaiRun, Score, TicTacToeRun, User, db
+from app.models import WheresWilsonRun, KaiRun, Score, TicTacToeRun, User, db
 
 main_bp = Blueprint('main', __name__)
 
@@ -162,7 +162,16 @@ def tictactoe():
 @main_bp.route('/game1')
 @login_required
 def game1():
-    return render_template('game1.html')
+    top_scores = (
+        db.session.query(WheresWilsonRun, User)
+        .join(User, WheresWilsonRun.user_id == User.id)
+        .order_by(WheresWilsonRun.time_ms.asc())
+        .limit(3)
+        .all()
+    )
+
+    personal_run = db.session.query(WheresWilsonRun).filter_by(user_id=current_user.id).first()
+    return render_template('game1.html', top_scores=top_scores, personal_run=personal_run)
 
 @main_bp.route('/play/kai')
 @login_required
@@ -292,6 +301,30 @@ def api_save_tictactoe_run():
     db.session.commit()
 
     return jsonify(ok=True)
+
+@main_bp.route('/api/game1/runs', methods=['POST'])
+@login_required
+def api_save_whereswilson_run():
+    data = request.get_json(silent=True) or {}
+    time_ms = data.get('time_ms')
+
+    if not _is_nonneg_int(time_ms):
+        return jsonify(ok=False, error='invalid payload'), 400
+    
+    existing = db.session.query(WheresWilsonRun).filter_by(user_id=current_user.id).first()
+    is_new_best = False
+
+    if existing is None:
+        existing = WheresWilsonRun(user_id=current_user.id, time_ms=time_ms)
+        db.session.add(existing)
+        is_new_best = True
+    elif time_ms < existing.time_ms:
+        existing.time_ms = time_ms
+        existing.created_at = datetime.utcnow()
+        is_new_best = True
+    
+    db.session.commit()
+    return jsonify(ok=True, is_new_best=is_new_best)
 
 
 @main_bp.route('/logout')
