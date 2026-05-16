@@ -13,8 +13,6 @@
 <body class="min-vh-100 d-flex flex-column">
 
     <nav class="profile-navbar">
-
-        <!-- Hamburger: opens offcanvas sidebar -->
         <button class="sidebar-toggle"
                 type="button"
                 data-bs-toggle="offcanvas"
@@ -26,10 +24,8 @@
             <span></span>
         </button>
 
-        <!-- Brand -->
         <a class="brand" href="{{ url_for('main.stages') }}">YOU GOOD MUD?</a>
 
-        <!-- Profile dropdown (right side) -->
         <div class="dropdown">
             <button class="profile-btn" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                 {% if current_user.is_authenticated %}
@@ -57,8 +53,8 @@
                     </li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
-                        <a class="dropdown-item" href="{{ url_for('main.customisation') }}">
-                            ✏️ Customise Profile
+                        <a class="dropdown-item" href="{{ url_for('main.settings') }}">
+                            ⚙️ Account Settings
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -98,7 +94,6 @@
 
         <div class="offcanvas-body d-flex flex-column p-0">
 
-            <!-- Main navigation links -->
             <ul class="sidebar-nav">
                 <li>
                     <a class="sidebar-link {% if request.endpoint == 'main.login' %}active{% endif %}"
@@ -113,24 +108,16 @@
                     </a>
                 </li>
                 <li>
-                    <a class="sidebar-link {% if request.path == '/leaderboard' %}active{% endif %}"
-                       href="/leaderboard">
-                        🏆 Leaderboard
-                    </a>
-                </li>
-                <li>
-                    <!-- Tutorial: disabled until route exists -->
                     <a class="sidebar-link sidebar-link-disabled"
                        href="#"
                        tabindex="-1"
                        aria-disabled="true">
-                        📖 Tutorial
+                        🏆 Leaderboard
                         <span class="sidebar-badge">soon</span>
                     </a>
                 </li>
             </ul>
 
-            <!-- Account section pinned to bottom, logged-in users only -->
             {% if current_user.is_authenticated %}
             <ul class="sidebar-nav sidebar-nav-bottom">
                 <li><hr class="sidebar-divider"></li>
@@ -138,13 +125,7 @@
                 <li>
                     <a class="sidebar-link {% if request.endpoint == 'main.settings' %}active{% endif %}"
                        href="{{ url_for('main.settings') }}">
-                        ⚙️ Settings
-                    </a>
-                </li>
-                <li>
-                    <a class="sidebar-link {% if request.endpoint == 'main.customisation' %}active{% endif %}"
-                       href="{{ url_for('main.customisation') }}">
-                        ✏️ Customise Profile
+                        ⚙️ Account Settings
                     </a>
                 </li>
                 <li><hr class="sidebar-divider"></li>
