@@ -5,8 +5,6 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash
 
 db = SQLAlchemy()
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
 
@@ -19,6 +17,8 @@ class User(UserMixin, db.Model):
     avatar = db.Column(db.String(20), nullable=True, default='av1')
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    secret_question = db.Column(db.String(100), nullable=True) 
+    secret_answer_hash = db.Column(db.String(255), nullable=True)
 
     def set_password(self, raw_password):
         # never store the plaintext password, only the hash
@@ -26,10 +26,17 @@ class User(UserMixin, db.Model):
 
     def check_password(self, raw_password):
         return check_password_hash(self.password_hash, raw_password)
+    
+    def set_secret_answer(self, raw_answer):
+        self.secret_answer_hash = generate_password_hash(raw_answer.lower().strip())
+
+    def check_secret_answer(self, raw_answer):
+        if not self.secret_answer_hash:
+            return False
+        return check_password_hash(self.secret_answer_hash, raw_answer.lower().strip())
 
     def __repr__(self):
         return f'<User {self.username}>'
-
 
 class Score(db.Model):
     __tablename__ = 'scores'
@@ -45,7 +52,6 @@ class Score(db.Model):
 
     def __repr__(self):
         return f'<Score {self.game}:{self.value} user={self.user_id}>'
-
 
 class KaiRun(db.Model):
     # per-game table, one row per Snack-Time playthrough. other games will get their own
