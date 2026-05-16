@@ -12,6 +12,7 @@
 </head>
 <body class="min-vh-100 d-flex flex-column">
 
+    {% if current_user.is_authenticated %}
     <nav class="profile-navbar">
         <button class="sidebar-toggle"
                 type="button"
@@ -131,6 +132,7 @@
 
         </div>
     </div>
+    {% endif %}
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
