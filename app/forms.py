@@ -89,6 +89,7 @@ class ResetPasswordForm(FlaskForm):
             DataRequired(),
             Length(min=8, max=32),
             Regexp(r'.*\d.*', message='Password must contain at least one number.'),
+            Regexp(r'[!@#$%&*_]', message='Password must contain at least one symbol (! @ # $ % & * _).'),
         ],
     )
     confirm_new_password = PasswordField(
