@@ -97,15 +97,9 @@
 
             <ul class="sidebar-nav">
                 <li>
-                    <a class="sidebar-link {% if request.endpoint == 'main.login' %}active{% endif %}"
-                       href="{{ url_for('main.login') }}">
-                        🏠 Home
-                    </a>
-                </li>
-                <li>
                     <a class="sidebar-link {% if request.endpoint == 'main.stages' %}active{% endif %}"
                        href="{{ url_for('main.stages') }}">
-                        🎮 Stages
+                        🏠 Home
                     </a>
                 </li>
             </ul>
