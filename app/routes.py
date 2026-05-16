@@ -14,7 +14,7 @@ from app.forms import (
     LoginForm,
     SignupForm,
 )
-from app.models import KaiRun, Score, User, db
+from app.models import KaiRun, Score, TicTacToeRun, User, db
 
 main_bp = Blueprint('main', __name__)
 
@@ -145,15 +145,27 @@ def settings():
 def stages():
     return render_template('stages.html')
 
+
 @main_bp.route('/tictactoe')
 @login_required
 def tictactoe():
-    return render_template('ticTacToe.html')
+    top_scores = (
+        db.session.query(TicTacToeRun, User)
+            .join(User, TicTacToeRun.user_id == User.id)
+            .filter(TicTacToeRun.best_win_ms.isnot(None))
+            .order_by(TicTacToeRun.best_win_ms.asc())
+            .limit(3)
+            .all()
+    )
+    personal_run = db.session.query(TicTacToeRun).filter_by(user_id=current_user.id).first()
+    return render_template('ticTacToe.html', top_scores=top_scores, personal_run=personal_run)
+
 
 @main_bp.route('/game1')
 @login_required
 def game1():
     return render_template('game1.html')
+
 
 @main_bp.route('/play/kai')
 @login_required
@@ -169,8 +181,6 @@ def play_kai():
             .limit(3)
             .all()
     )
-    # the current user's own best, shown in a separate "Your Best" panel even when they
-    # aren't in the top 3, so a subpar run still updates a visible record after reload
     personal_run = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
     # cache-buster so iterating on kai-game.js during dev doesn't get clobbered by stale browser caches
     js_path = os.path.join(current_app.static_folder, 'js', 'kai-game.js')
@@ -245,13 +255,41 @@ def api_save_kai_run():
         existing.time_ms = time_ms
         existing.avg_eat_ms = avg_eat_ms
         existing.eat_count = eat_count
-        # created_at tracks when the current best was set, refresh it on every overwrite
         existing.created_at = datetime.utcnow()
         db.session.commit()
         is_new_best = True
-    # client uses is_new_best to decide whether to reload the page so the leaderboard and
-    # the Your Best panel reflect the freshly-saved row
     return jsonify(ok=True, is_new_best=is_new_best)
+
+
+@main_bp.route('/api/tictactoe/runs', methods=['POST'])
+@login_required
+def api_save_tictactoe_run():
+    data = request.get_json(silent=True) or {}
+    result = data.get('result')
+    time_ms = data.get('time_ms')
+
+    if result not in ('win', 'loss', 'draw'):
+        return jsonify(ok=False, error='invalid payload'), 400
+    if result == 'win' and not _is_nonneg_int(time_ms):
+        return jsonify(ok=False, error='invalid payload'), 400
+
+    existing = db.session.query(TicTacToeRun).filter_by(user_id=current_user.id).first()
+    if existing is None:
+        existing = TicTacToeRun(user_id=current_user.id, wins=0, losses=0, draws=0)
+        db.session.add(existing)
+
+    if result == 'win':
+        existing.wins += 1
+        if existing.best_win_ms is None or time_ms < existing.best_win_ms:
+            existing.best_win_ms = time_ms
+    elif result == 'loss':
+        existing.losses += 1
+    else:
+        existing.draws += 1
+    existing.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify(ok=True)
 
 
 @main_bp.route('/logout')

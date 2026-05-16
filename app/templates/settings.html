@@ -1,153 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block title %}Account Settings — YOU GOOD MUD?{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/customisation.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
-    <title>Account Settings</title>
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/customisation.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/settings.css') }}">
+{% endblock %}
 
-<body class="min-vh-100 d-flex flex-column">
+{% block content %}
+<div class="container py-4 flex-grow-1">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <h2 class="mb-4 text-center">Account Settings</h2>
 
-    <nav class = "profile-navbar">
-    <a class = "brand" href = "{{ url_for('main.stages') }}">YOU GOOD MUD?</a>
-
-    <div class ="dropdown">
-        <button class = "profile-btn" type = "button" data-bs-toggle="dropdown" aria-expanded="false">
-            <div class = "profile-initial" id = "navProfileDisplay">?</div>
-        </button>
-        <ul class = "dropdown-menu dropdown-menu-end dropdown-menu-dark">
-            <li>
-                <span class="dropdown-item-text text-secondary small" id="navDisplayName">
-                Guest
-                </span>
-            </li>
-            <li><hr class = "dropdown-divider"></li>
-            <li>
-                <a class = "dropdown-item" href="{{ url_for('main.customisation') }}">
-                    &#9881; Customise Profile
-                </a>
-            </li>
-            <li>
-                <a class = "dropdown-item" href="{{ url_for('main.settings') }}">
-                    &#9881; Settings
-                </a>
-            </li>
-            <li>
-                <a class = "dropdown-item text-danger" href ="{{ url_for('main.login') }}" onclick="handleLogout()">
-                    &#8594; Logout
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
-
-    <div class="container py-4 flex-grow-1">
-        <div class="row justify-content-center">
-            <div class="col-12 col-md-8 col-lg-6">
-
-                <h2 class="mb-4 text-center">Account Settings</h2>
-
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
-                {% endwith %}
-
-                <!-- Display name -->
-                <div class="card p-4 mb-4">
-                    <h5 class="mb-3">Display Name</h5>
-                    <form method="POST" action="{{ url_for('main.settings') }}">
-                        {{ form_displayname.hidden_tag() }}
-                        <div class="mb-3">
-                            <label for="settingsDisplayName" class="form-label">Display Name</label>
-                            <input type="text" id="settingsDisplayName" name="display_name" class="form-control"
-                                maxlength="20" value="{{ form_displayname.display_name.data or '' }}">
-                            <div class="form-text">Max 20 characters. Shown on the leaderboard.</div>
-                            {% if form_displayname.display_name.errors %}
-                                {% for error in form_displayname.display_name.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <button type="submit" name="submit_displayname" value="y" class="btn btn-primary">Save display name</button>
-                    </form>
-                </div>
-
-                <!-- Avatar -->
-                <div class="card p-4 mb-4">
-                    <h5 class="mb-3">Profile Picture</h5>
-                    <form method="POST" action="{{ url_for('main.settings') }}">
-                        {{ form_avatar.hidden_tag() }}
-                        {% with selected_avatar=form_avatar.avatar.data or 'av1', field_name='avatar' %}
-                            {% include '_avatar_grid.html' %}
-                        {% endwith %}
-                        {% if form_avatar.avatar.errors %}
-                            {% for error in form_avatar.avatar.errors %}
+            <!-- Display name -->
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3">Display Name</h5>
+                <form method="POST" action="{{ url_for('main.settings') }}">
+                    {{ form_displayname.hidden_tag() }}
+                    <div class="mb-3">
+                        <label for="settingsDisplayName" class="form-label">Display Name</label>
+                        <input type="text" id="settingsDisplayName" name="display_name" class="form-control"
+                            maxlength="20" value="{{ form_displayname.display_name.data or '' }}">
+                        <div class="form-text">Max 20 characters. Shown on the leaderboard.</div>
+                        {% if form_displayname.display_name.errors %}
+                            {% for error in form_displayname.display_name.errors %}
                                 <div class="text-danger small">{{ error }}</div>
                             {% endfor %}
                         {% endif %}
-                        <button type="submit" name="submit_avatar" value="y" class="btn btn-primary mt-3">Save avatar</button>
-                    </form>
-                </div>
-
-                <!-- Password -->
-                <div class="card p-4 mb-4">
-                    <h5 class="mb-3">Change Password</h5>
-                    <form method="POST" action="{{ url_for('main.settings') }}">
-                        {{ form_password.hidden_tag() }}
-                        <div class="mb-3">
-                            <label for="currentPassword" class="form-label">Current Password</label>
-                            <input type="password" id="currentPassword" name="current_password" class="form-control" maxlength="32">
-                            {% if form_password.current_password.errors %}
-                                {% for error in form_password.current_password.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <div class="mb-3">
-                            <label for="newPassword" class="form-label">New Password</label>
-                            <input type="password" id="newPassword" name="new_password" class="form-control"
-                                maxlength="32" placeholder="Min. 8 characters" oninput="validateSettingsPassword()">
-                            {% if form_password.new_password.errors %}
-                                {% for error in form_password.new_password.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <div class="mb-3">
-                            <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
-                            <input type="password" id="confirmNewPassword" name="confirm_new_password" class="form-control"
-                                maxlength="32" oninput="validateSettingsPassword()">
-                            <div id="newPasswordError" class="text-danger small" style="display:none;"></div>
-                            {% if form_password.confirm_new_password.errors %}
-                                {% for error in form_password.confirm_new_password.errors %}
-                                    <div class="text-danger small">{{ error }}</div>
-                                {% endfor %}
-                            {% endif %}
-                        </div>
-                        <button type="submit" name="submit_password" value="y" class="btn btn-primary">Change password</button>
-                    </form>
-                </div>
-
+                    </div>
+                    <button type="submit" name="submit_displayname" value="y" class="btn btn-primary">Save display name</button>
+                </form>
             </div>
+
+            <!-- Avatar -->
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3">Profile Picture</h5>
+                <form method="POST" action="{{ url_for('main.settings') }}">
+                    {{ form_avatar.hidden_tag() }}
+                    {% with selected_avatar=form_avatar.avatar.data or 'av1', field_name='avatar' %}
+                        {% include '_avatar_grid.html' %}
+                    {% endwith %}
+                    {% if form_avatar.avatar.errors %}
+                        {% for error in form_avatar.avatar.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <button type="submit" name="submit_avatar" value="y" class="btn btn-primary mt-3">Save avatar</button>
+                </form>
+            </div>
+
+            <!-- Password -->
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3">Change Password</h5>
+                <form method="POST" action="{{ url_for('main.settings') }}">
+                    {{ form_password.hidden_tag() }}
+                    <div class="mb-3">
+                        <label for="currentPassword" class="form-label">Current Password</label>
+                        <input type="password" id="currentPassword" name="current_password" class="form-control" maxlength="32">
+                        {% if form_password.current_password.errors %}
+                            {% for error in form_password.current_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="newPassword" class="form-label">New Password</label>
+                        <input type="password" id="newPassword" name="new_password" class="form-control"
+                            maxlength="32" placeholder="Min. 8 characters" oninput="validateSettingsPassword()">
+                        {% if form_password.new_password.errors %}
+                            {% for error in form_password.new_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+                        <input type="password" id="confirmNewPassword" name="confirm_new_password" class="form-control"
+                            maxlength="32" oninput="validateSettingsPassword()">
+                        <div id="newPasswordError" class="text-danger small" style="display:none;"></div>
+                        {% if form_password.confirm_new_password.errors %}
+                            {% for error in form_password.confirm_new_password.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="submit_password" value="y" class="btn btn-primary">Change password</button>
+                </form>
+            </div>
+
         </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I"
-        crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/customisation.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/settings.js') }}"></script>
-
-</body>
-
-</html>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/customisation.js') }}"></script>
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}

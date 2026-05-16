@@ -49,4 +49,161 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}/* ============================================================
+   ADDITIONS TO navbar.css — Offcanvas Sidebar Navigation
+   Append these rules to the bottom of your existing navbar.css
+   ============================================================ */
+
+
+/* ── Hamburger toggle button ── */
+.sidebar-toggle {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 5px;
+    transition: background 0.15s;
+}
+
+.sidebar-toggle:hover {
+    background: #2a2a2a;
+}
+
+.sidebar-toggle span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background-color: #eee;
+    border-radius: 2px;
+    transition: background 0.15s;
+}
+
+.sidebar-toggle:hover span {
+    background-color: #fff;
+}
+
+
+/* ── Offcanvas panel overrides ── */
+#sidebarMenu {
+    background-color: #161616;
+    border-right: 1px solid #2a2a2a;
+    max-width: 240px;
+}
+
+#sidebarMenu .offcanvas-header {
+    border-bottom: 1px solid #252525;
+    padding: 1rem 1.2rem;
+}
+
+#sidebarMenu .offcanvas-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+
+/* ── Sidebar nav list ── */
+.sidebar-nav {
+    list-style: none;
+    padding: 0.5rem 0.6rem;
+    margin: 0;
+}
+
+/* Bottom account section — pinned to the bottom of the flex column */
+.sidebar-nav-bottom {
+    margin-top: auto;
+    padding-bottom: 0.75rem;
+}
+
+
+/* ── Individual nav links ── */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    color: #aaa;
+    text-decoration: none;
+    font-size: 0.88rem;
+    transition: background 0.15s, color 0.15s;
+    margin: 1px 0;
+    border-left: 3px solid transparent;
+}
+
+.sidebar-link:hover {
+    background: #222;
+    color: #eee;
+    text-decoration: none;
+}
+
+/* Active page highlight */
+.sidebar-link.active {
+    background: #1e1e3a;
+    color: #9090ff;
+    font-weight: 600;
+    border-left-color: #6666dd;
+}
+
+/* Disabled link (Tutorial — route not built yet) */
+.sidebar-link-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Danger link (Logout) */
+.sidebar-link-danger {
+    color: #e57373;
+}
+
+.sidebar-link-danger:hover {
+    background: #2a1515;
+    color: #ff7070;
+}
+
+
+/* ── "Soon" badge on Tutorial ── */
+.sidebar-badge {
+    margin-left: auto;
+    background: #2a2a2a;
+    color: #666;
+    font-size: 0.62rem;
+    padding: 2px 7px;
+    border-radius: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+/* ── Section label inside sidebar ── */
+.sidebar-section-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: #555;
+    padding: 4px 12px 6px;
+    display: block;
+}
+
+
+/* ── Divider inside sidebar ── */
+.sidebar-divider {
+    border: none;
+    border-top: 1px solid #252525;
+    margin: 6px 10px;
+}
+
+
+/* ── Profile dropdown: "Signed in as" header ── */
+.dropdown-item-text strong {
+    font-size: 0.88rem;
 }
