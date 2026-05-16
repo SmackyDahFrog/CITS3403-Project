@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+
 {% block title %}Snack-Time{% endblock %}
 
 {% block extra_css %}
@@ -43,6 +44,7 @@
                 <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
                 {% endfor %}
             </ol>
+
             <h3 class="text-center mt-4">Your Best</h3>
             <ul class="list-group">
                 {% if personal_run %}

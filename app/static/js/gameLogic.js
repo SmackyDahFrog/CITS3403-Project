@@ -1,5 +1,22 @@
 let board = ['', '', '', '', '', '', '', '', ''];
 let gameOver = false;
+let gameStartTime = Date.now();
+let pauseStartTime = null;
+let timerInterval = null;
+let restartTimeout = null;
+
+const timerEl = document.getElementById('tttTimer');
+
+function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!gameOver) {
+            timerEl.textContent = ((Date.now() - gameStartTime) / 1000).toFixed(3) + 's';
+        }
+    }, 10);
+}
+
+startTimer();
  
 const cells = document.querySelectorAll('.tttCell');
  
@@ -28,14 +45,42 @@ function highlightDraw() {
 }
 
 function handleResult(result) {
-    if (!result) return false;
+    if (!result) return null;
+    clearTimeout(restartTimeout);
+    restartTimeout = null;
     gameOver = true;
+    clearInterval(timerInterval);
+    pauseStartTime = Date.now();
     if (result.winner === 'draw') {
         highlightDraw();
     } else if (result.line) {
         highlightWin(result.line);
     }
-    return true;
+    return result.winner; // 'X', 'O', or 'draw'
+}
+
+function scheduleRestart() {
+    restartTimeout = setTimeout(resetGame, 1500);
+}
+
+async function submitResult(outcome, timeMs) {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const body = { result: outcome };
+    if (timeMs !== undefined) body.time_ms = timeMs;
+    try {
+        const res = await fetch('/api/tictactoe/runs', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+            },
+            body: JSON.stringify(body),
+        });
+        const data = await res.json();
+        if (data.ok && outcome === 'win') setTimeout(() => location.reload(), 1500);
+    } catch (e) {
+        console.error('tictactoe score submit failed:', e);
+    }
 }
  
 function minimax(b, isAI) {
@@ -61,7 +106,7 @@ function minimax(b, isAI) {
  
 function aiMove() {
     let move;
- 
+
     if (Math.random() < 0.15) {
         const empty = [];
         for (let i = 0; i < 9; i++) if (board[i] === '') empty.push(i);
@@ -69,34 +114,52 @@ function aiMove() {
     } else {
         move = minimax([...board], true).index;
     }
- 
+
     board[move] = 'O';
     cells[move].textContent = 'O';
- 
-    handleResult(checkWinner(board));
+
+    const winner = handleResult(checkWinner(board));
+    if (winner) {
+        const outcome = winner === 'X' ? 'win' : winner === 'draw' ? 'draw' : 'loss';
+        submitResult(outcome, outcome === 'win' ? Date.now() - gameStartTime : undefined);
+        if (outcome !== 'win') scheduleRestart();
+    }
 }
  
 cells.forEach((cell, i) => {
     cell.addEventListener('click', () => {
         if (board[i] !== '' || gameOver) return;
- 
+
         board[i] = 'X';
         cell.textContent = 'X';
- 
-        if (handleResult(checkWinner(board))) return;
- 
+
+        const winner = handleResult(checkWinner(board));
+        if (winner) {
+            const outcome = winner === 'X' ? 'win' : winner === 'draw' ? 'draw' : 'loss';
+            submitResult(outcome, outcome === 'win' ? Date.now() - gameStartTime : undefined);
+            if (outcome !== 'win') scheduleRestart();
+            return;
+        }
+
         aiMove();
     });
 });
 
 function resetGame() {
+    clearTimeout(restartTimeout);
+    restartTimeout = null;
     board = ['', '', '', '', '', '', '', '', ''];
     gameOver = false;
+    if (pauseStartTime !== null) {
+        gameStartTime += Date.now() - pauseStartTime;
+        pauseStartTime = null;
+    }
     cells.forEach(cell => {
         cell.textContent = '';
         cell.classList.remove('winning');
         cell.classList.remove('draw');
     });
+    startTimer();
 }
 
 document.getElementById('resetBtn').addEventListener('click', resetGame);

@@ -7,7 +7,15 @@
 .tttSubtitle {
     text-align: center;
     color: #6c757d;
-    margin-bottom: 30px;
+    margin-bottom: 8px;
+}
+
+.tttTimer {
+    text-align: center;
+    font-size: 1.5rem;
+    font-variant-numeric: tabular-nums;
+    color: #adb5bd;
+    margin-bottom: 20px;
 }
  
 .tttControls {
@@ -72,4 +80,11 @@
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50%      { transform: scale(1.1); }
+}
+
+.ttt-leaderboard {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
 }
