@@ -145,6 +145,7 @@ def settings():
 def stages():
     return render_template('stages.html')
 
+
 @main_bp.route('/tictactoe')
 @login_required
 def tictactoe():
@@ -159,10 +160,12 @@ def tictactoe():
     personal_run = db.session.query(TicTacToeRun).filter_by(user_id=current_user.id).first()
     return render_template('ticTacToe.html', top_scores=top_scores, personal_run=personal_run)
 
+
 @main_bp.route('/game1')
 @login_required
 def game1():
     return render_template('game1.html')
+
 
 @main_bp.route('/play/kai')
 @login_required
@@ -178,8 +181,6 @@ def play_kai():
             .limit(3)
             .all()
     )
-    # the current user's own best, shown in a separate "Your Best" panel even when they
-    # aren't in the top 3, so a subpar run still updates a visible record after reload
     personal_run = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
     # cache-buster so iterating on kai-game.js during dev doesn't get clobbered by stale browser caches
     js_path = os.path.join(current_app.static_folder, 'js', 'kai-game.js')
@@ -254,12 +255,9 @@ def api_save_kai_run():
         existing.time_ms = time_ms
         existing.avg_eat_ms = avg_eat_ms
         existing.eat_count = eat_count
-        # created_at tracks when the current best was set, refresh it on every overwrite
         existing.created_at = datetime.utcnow()
         db.session.commit()
         is_new_best = True
-    # client uses is_new_best to decide whether to reload the page so the leaderboard and
-    # the Your Best panel reflect the freshly-saved row
     return jsonify(ok=True, is_new_best=is_new_best)
 
 
