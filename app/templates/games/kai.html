@@ -1,108 +1,66 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
+{% block title %}Snack-Time{% endblock %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/MainPage.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/navbar.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/kai.css') }}">
-    <title>Snack-Time</title>
-</head>
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/kai.css') }}">
+{% endblock %}
 
-<body class="min-vh-100 d-flex flex-column">
-
-    <nav class = "profile-navbar">
-    <a class = "brand" href = "{{ url_for('main.stages') }}">YOU GOOD MUD?</a>
-
-    <div class ="dropdown">
-        <button class = "profile-btn" type = "button" data-bs-toggle="dropdown" aria-expanded="false">
-            <div class = "profile-initial" id = "navProfileDisplay">?</div>
-        </button>
-        <ul class = "dropdown-menu dropdown-menu-end dropdown-menu-dark">
-            <li>
-                <span class="dropdown-item-text text-secondary small" id="navDisplayName">
-                Guest
-                </span>
-            </li>
-            <li><hr class = "dropdown-divider"></li>
-            <li>
-                <a class = "dropdown-item" href="{{ url_for('main.customisation') }}">
-                    &#9881; Customise Profile
-                </a>
-            </li>
-            <li>
-                <a class = "dropdown-item text-danger" href ="{{ url_for('main.login') }}" onclick="handleLogout()">
-                    &#8594; Logout
-                </a>
-            </li>
-        </ul>
-    </div>
-</nav>
-
-    <div class="container py-4">
-        <h1 class="text-center mb-2">Snack-Time</h1>
-        <p class="text-center text-secondary mb-4">
-            Glide your cursor over the ball to eat it. Each eat shrinks the next one.
-        </p>
-        <div class="d-flex flex-column align-items-center">
-            <div class="kai-stage">
-                <canvas id="kaiCanvas" width="1000" height="600"></canvas>
-                <div class="kai-too-small" role="status">
-                    <p class="mb-2 fw-bold">Window too narrow</p>
-                    <p class="mb-0">Resize your window wider to play Snack-Time.</p>
-                </div>
-            </div>
-            <div class="kai-controls mt-2">
-                <label for="soundSelect" class="text-white-50 small me-2 mb-0">Sound:</label>
-                <select id="soundSelect" class="form-select form-select-sm">
-                    <option value="Tok3" selected>Tok3</option>
-                    <option value="Moshi">Moshi</option>
-                    <option value="">No sound</option>
-                </select>
-            </div>
-            <button id="restartBtn" class="btn btn-light mt-3">Restart (R)</button>
-            <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light mt-2">Back to Stages</a>
-            <div class="kai-leaderboard mt-4">
-                <h3 class="text-center">Top 3</h3>
-                <ol class="list-group">
-                    {% for run, user in top_scores %}
-                    <li class="list-group-item bg-dark text-white d-flex justify-content-between">
-                        <span>{{ user.display_name or user.username }}</span>
-                        <span>
-                            {{ '%.3f'|format(run.time_ms / 1000) }}s{% if run.avg_eat_ms %} &middot; {{ '%.3f'|format(run.avg_eat_ms / 1000) }}s/munch{% endif %}
-                        </span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
-                    {% endfor %}
-                </ol>
-
-                <h3 class="text-center mt-4">Your Best</h3>
-                <ul class="list-group">
-                    {% if personal_run %}
-                    <li class="list-group-item bg-dark text-white d-flex justify-content-between">
-                        <span>{{ current_user.display_name or current_user.username }}</span>
-                        <span>
-                            {{ '%.3f'|format(personal_run.time_ms / 1000) }}s{% if personal_run.avg_eat_ms %} &middot; {{ '%.3f'|format(personal_run.avg_eat_ms / 1000) }}s/munch{% endif %}
-                        </span>
-                    </li>
-                    {% else %}
-                    <li class="list-group-item bg-dark text-white">No run yet, play to set your best.</li>
-                    {% endif %}
-                </ul>
+{% block content %}
+<div class="container py-4">
+    <h1 class="text-center mb-2">Snack-Time</h1>
+    <p class="text-center text-secondary mb-4">
+        Glide your cursor over the ball to eat it. Each eat shrinks the next one.
+    </p>
+    <div class="d-flex flex-column align-items-center">
+        <div class="kai-stage">
+            <canvas id="kaiCanvas" width="1000" height="600"></canvas>
+            <div class="kai-too-small" role="status">
+                <p class="mb-2 fw-bold">Window too narrow</p>
+                <p class="mb-0">Resize your window wider to play Snack-Time.</p>
             </div>
         </div>
+        <div class="kai-controls mt-2">
+            <label for="soundSelect" class="text-white-50 small me-2 mb-0">Sound:</label>
+            <select id="soundSelect" class="form-select form-select-sm">
+                <option value="Tok3" selected>Tok3</option>
+                <option value="Moshi">Moshi</option>
+                <option value="">No sound</option>
+            </select>
+        </div>
+        <button id="restartBtn" class="btn btn-light mt-3">Restart (R)</button>
+        <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light mt-2">Back to Stages</a>
+        <div class="kai-leaderboard mt-4">
+            <h3 class="text-center">Top 3</h3>
+            <ol class="list-group">
+                {% for run, user in top_scores %}
+                <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                    <span>{{ user.display_name or user.username }}</span>
+                    <span>
+                        {{ '%.3f'|format(run.time_ms / 1000) }}s{% if run.avg_eat_ms %} &middot; {{ '%.3f'|format(run.avg_eat_ms / 1000) }}s/munch{% endif %}
+                    </span>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white">No scores yet, be the first.</li>
+                {% endfor %}
+            </ol>
+            <h3 class="text-center mt-4">Your Best</h3>
+            <ul class="list-group">
+                {% if personal_run %}
+                <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                    <span>{{ current_user.display_name or current_user.username }}</span>
+                    <span>
+                        {{ '%.3f'|format(personal_run.time_ms / 1000) }}s{% if personal_run.avg_eat_ms %} &middot; {{ '%.3f'|format(personal_run.avg_eat_ms / 1000) }}s/munch{% endif %}
+                    </span>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white">No run yet, play to set your best.</li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
+</div>
+{% endblock %}
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I"
-        crossorigin="anonymous"></script>
-    <script src="{{ url_for('static', filename='js/navbar.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/kai-game.js') }}?v={{ js_version }}"></script>
-</body>
-
-</html>
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/kai-game.js') }}?v={{ js_version }}"></script>
+{% endblock %}
