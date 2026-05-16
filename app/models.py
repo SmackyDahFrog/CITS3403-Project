@@ -47,6 +47,23 @@ class Score(db.Model):
         return f'<Score {self.game}:{self.value} user={self.user_id}>'
 
 
+class TicTacToeRun(db.Model):
+    __tablename__ = 'tictactoe_runs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    wins = db.Column(db.Integer, nullable=False, default=0)
+    losses = db.Column(db.Integer, nullable=False, default=0)
+    draws = db.Column(db.Integer, nullable=False, default=0)
+    best_win_ms = db.Column(db.Integer, nullable=True)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='tictactoe_runs')
+
+    def __repr__(self):
+        return f'<TicTacToeRun wins={self.wins} losses={self.losses} draws={self.draws} user={self.user_id}>'
+
+
 class KaiRun(db.Model):
     # per-game table, one row per Snack-Time playthrough. other games will get their own
     # table each, the legacy scores table sticks around for the games that haven't migrated yet
