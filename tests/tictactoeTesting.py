@@ -253,6 +253,9 @@ class TicTacToeSeleniumTests(unittest.TestCase):
         self.assertIsNotNone(run.best_win_ms)
 
     def test_10_best_win_ms_matches_displayed_time(self):
+        # Clear any prior run so this test's win is guaranteed to be the best
+        TicTacToeRun.query.filter_by(user_id=self.user_id).delete()
+        db.session.commit()
         self._setup_near_win()
         self._cells()[2].click()
         self.wait.until(EC.visibility_of_element_located((By.ID, 'tttEndScreen')))
