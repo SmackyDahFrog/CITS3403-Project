@@ -102,6 +102,12 @@
                         🏠 Home
                     </a>
                 </li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.following' %}active{% endif %}"
+                       href="{{ url_for('main.following') }}">
+                        👥 Following
+                    </a>
+                </li>
                 <li><span class="sidebar-section-label">Games</span></li>
                 <li>
                     <a class="sidebar-link {% if request.endpoint == 'main.game1' %}active{% endif %}"

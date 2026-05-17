@@ -18,7 +18,7 @@ from app.forms import (
     SetSecretQuestionForm,
     SignupForm,
 )
-from app.models import WheresWilsonRun, KaiRun, Score, TicTacToeRun, User, db
+from app.models import Follow, WheresWilsonRun, KaiRun, Score, TicTacToeRun, User, db
 
 main_bp = Blueprint('main', __name__)
 
@@ -26,6 +26,11 @@ main_bp = Blueprint('main', __name__)
 _username_check_hits = defaultdict(deque)
 USERNAME_CHECK_WINDOW = 10.0
 USERNAME_CHECK_LIMIT = 20
+
+# same idea for the user search box, slightly higher cap since results aren't unique-per-user
+_user_search_hits = defaultdict(deque)
+USER_SEARCH_WINDOW = 10.0
+USER_SEARCH_LIMIT = 40
 
 ALLOWED_GAMES = {'tictactoe', 'wilson'}
 
@@ -362,6 +367,106 @@ def api_save_whereswilson_run():
     
     db.session.commit()
     return jsonify(ok=True, is_new_best=is_new_best)
+
+
+@main_bp.route('/following')
+@login_required
+def following():
+    # list of users that current_user follows, ordered alphabetically so it's predictable
+    followed = (
+        db.session.query(User)
+        .join(Follow, Follow.followed_id == User.id)
+        .filter(Follow.follower_id == current_user.id)
+        .order_by(User.username.asc())
+        .all()
+    )
+    return render_template('following.html', followed=followed)
+
+
+@main_bp.route('/api/users/search')
+@login_required
+def api_user_search():
+    # same per-IP rate limit pattern as /check-username, since this is also called on every keystroke
+    ip = request.remote_addr or 'unknown'
+    now = time.time()
+    hits = _user_search_hits[ip]
+    while hits and now - hits[0] > USER_SEARCH_WINDOW:
+        hits.popleft()
+    if len(hits) >= USER_SEARCH_LIMIT:
+        return jsonify(ok=False, reason='rate_limited', results=[]), 429
+    hits.append(now)
+
+    query = request.args.get('q', '').strip()
+    if len(query) < 1:
+        return jsonify(ok=True, results=[])
+    # escape the wildcard characters so a stray % or _ in the query doesn't match everything
+    safe = query.replace('\\', '\\\\').replace('%', '\\%').replace('_', '\\_')
+    pattern = '%' + safe + '%'
+    # match either the username or the display name, so a user typing the name they actually see still finds the account
+    matches = (
+        db.session.query(User)
+        .filter(User.id != current_user.id)
+        .filter(db.or_(
+            User.username.ilike(pattern, escape='\\'),
+            User.display_name.ilike(pattern, escape='\\'),
+        ))
+        .order_by(User.username.asc())
+        .limit(10)
+        .all()
+    )
+    # one query to find which of the matches we already follow, so the UI can show the right button
+    followed_ids = {
+        row[0] for row in db.session.query(Follow.followed_id)
+        .filter_by(follower_id=current_user.id).all()
+    }
+    results = []
+    for user in matches:
+        results.append({
+            'id': user.id,
+            'username': user.username,
+            'display_name': user.display_name or user.username,
+            'avatar': user.avatar or 'av1',
+            'is_followed': user.id in followed_ids,
+        })
+    return jsonify(ok=True, results=results)
+
+
+@main_bp.route('/api/follow', methods=['POST'])
+@login_required
+def api_follow():
+    data = request.get_json(silent=True) or {}
+    user_id = data.get('user_id')
+    if isinstance(user_id, bool) or not isinstance(user_id, int):
+        return jsonify(ok=False, error='invalid payload'), 400
+    if user_id == current_user.id:
+        return jsonify(ok=False, error='cannot follow self'), 400
+    target = User.query.get(user_id)
+    if target is None:
+        return jsonify(ok=False, error='not found'), 404
+    # do nothing if the row already exists, the unique constraint stops dupes but checking first avoids a noisy IntegrityError
+    existing = (
+        db.session.query(Follow)
+        .filter_by(follower_id=current_user.id, followed_id=user_id)
+        .first()
+    )
+    if existing is None:
+        db.session.add(Follow(follower_id=current_user.id, followed_id=user_id))
+        db.session.commit()
+    return jsonify(ok=True)
+
+
+@main_bp.route('/api/unfollow', methods=['POST'])
+@login_required
+def api_unfollow():
+    data = request.get_json(silent=True) or {}
+    user_id = data.get('user_id')
+    if isinstance(user_id, bool) or not isinstance(user_id, int):
+        return jsonify(ok=False, error='invalid payload'), 400
+    db.session.query(Follow).filter_by(
+        follower_id=current_user.id, followed_id=user_id,
+    ).delete()
+    db.session.commit()
+    return jsonify(ok=True)
 
 
 @main_bp.route('/logout')

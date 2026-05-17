@@ -74,3 +74,16 @@ class KaiRun(db.Model):
     user = db.relationship('User', backref='kai_runs')
     def __repr__(self):
         return f'<KaiRun time={self.time_ms}ms avg_eat={self.avg_eat_ms}ms user={self.user_id}>'
+
+class Follow(db.Model):
+    __tablename__ = 'follows'
+    id = db.Column(db.Integer, primary_key=True)
+    follower_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    followed_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # one user only follows another once, enforced at the DB level
+    __table_args__ = (db.UniqueConstraint('follower_id', 'followed_id', name='uq_follower_followed'),)
+    follower = db.relationship('User', foreign_keys=[follower_id], backref='following_links')
+    followed = db.relationship('User', foreign_keys=[followed_id], backref='follower_links')
+    def __repr__(self):
+        return f'<Follow {self.follower_id} -> {self.followed_id}>'

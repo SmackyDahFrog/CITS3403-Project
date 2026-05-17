@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Following{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/following.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="text-center mb-2">Following</h1>
+    <p class="text-center text-secondary mb-4">
+        Search for a user by name to follow them. Their scores show up on each game's leaderboard page.
+    </p>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="mb-3">
+                <input type="text" id="userSearch" class="form-control"
+                       autocomplete="off"
+                       placeholder="Search for a username">
+                <div id="searchStatus" class="small text-secondary mt-2" style="display:none;"></div>
+            </div>
+
+            <!-- live AJAX search results land here -->
+            <ul id="searchResults" class="list-group mb-4"></ul>
+
+            <h3>Currently Following</h3>
+            <ul id="followingList" class="list-group">
+                {% for user in followed %}
+                <li class="list-group-item bg-dark text-white d-flex align-items-center"
+                    data-user-id="{{ user.id }}">
+                    <img src="{{ url_for('static', filename='images/avatars/' ~ (user.avatar or 'av1') ~ '.png') }}"
+                         alt="" width="32" height="32"
+                         style="border-radius:50%; object-fit:cover; margin-right:10px;">
+                    <span class="flex-grow-1">{{ user.display_name or user.username }}</span>
+                    <button type="button" class="btn btn-sm btn-outline-light unfollow-btn"
+                            data-user-id="{{ user.id }}">
+                        Unfollow
+                    </button>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white" id="followingEmpty">
+                    You aren't following anyone yet.
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/following.js') }}"></script>
+{% endblock %}
