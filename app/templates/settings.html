@@ -88,6 +88,38 @@
                 </form>
             </div>
 
+            <!-- Secret question -->
+            <div class="card p-4 mb-4">
+                <h5 class="mb-3">Password Recovery Question</h5>
+                <form method="POST" action="{{ url_for('main.settings') }}">
+                    {{ form_secret.hidden_tag() }}
+                    <div class="mb-3">
+                        <label for="secret_question" class="form-label">Secret Question</label>
+                        <select id="secret_question" name="secret_question" class="form-select">
+                            {% for value, label in form_secret.secret_question.choices %}
+                                <option value="{{ value }}" {% if form_secret.secret_question.data == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        {% if form_secret.secret_question.errors %}
+                            {% for error in form_secret.secret_question.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="secret_answer" class="form-label">Answer</label>
+                        <input type="text" id="secret_answer" name="secret_answer" class="form-control" maxlength="100" autocomplete="off">
+                        <div class="form-text">Answer is not case-sensitive.</div>
+                        {% if form_secret.secret_answer.errors %}
+                            {% for error in form_secret.secret_answer.errors %}
+                                <div class="text-danger small">{{ error }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                    <button type="submit" name="submit_secret" value="y" class="btn btn-primary">Save secret question</button>
+                </form>
+            </div>
+
         </div>
     </div>
 </div>
