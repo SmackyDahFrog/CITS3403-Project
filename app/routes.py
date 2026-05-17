@@ -292,6 +292,40 @@ def api_save_tictactoe_run():
     return jsonify(ok=True)
 
 
+@main_bp.route('/api/tictactoe/leaderboard')
+@login_required
+def api_tictactoe_leaderboard():
+    top_scores = (
+        db.session.query(TicTacToeRun, User)
+            .join(User, TicTacToeRun.user_id == User.id)
+            .filter(TicTacToeRun.best_win_ms.isnot(None))
+            .order_by(TicTacToeRun.best_win_ms.asc())
+            .limit(3)
+            .all()
+    )
+    personal_run = db.session.query(TicTacToeRun).filter_by(user_id=current_user.id).first()
+    top = [
+        {
+            'name': run_user.display_name or run_user.username,
+            'best_win_ms': run.best_win_ms,
+            'wins': run.wins,
+            'draws': run.draws,
+            'losses': run.losses,
+        }
+        for run, run_user in top_scores
+    ]
+    personal = None
+    if personal_run:
+        personal = {
+            'name': current_user.display_name or current_user.username,
+            'best_win_ms': personal_run.best_win_ms,
+            'wins': personal_run.wins,
+            'draws': personal_run.draws,
+            'losses': personal_run.losses,
+        }
+    return jsonify(top=top, personal=personal)
+
+
 @main_bp.route('/logout')
 @login_required
 def logout():
