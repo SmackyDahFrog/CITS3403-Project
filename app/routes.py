@@ -5,6 +5,7 @@ from datetime import datetime
 
 from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, session, url_for
 from flask_login import current_user, login_required, login_user, logout_user
+from sqlalchemy import select
 
 from app.forms import (
     ChangeAvatarForm,
@@ -33,6 +34,11 @@ USER_SEARCH_WINDOW = 10.0
 USER_SEARCH_LIMIT = 40
 
 ALLOWED_GAMES = {'tictactoe', 'wilson'}
+
+
+def _followed_user_ids():
+    # select() of every user_id the current user follows, used to filter game-run tables
+    return select(Follow.followed_id).where(Follow.follower_id == current_user.id)
 
 
 @main_bp.route('/', methods=['GET', 'POST'])
@@ -171,7 +177,20 @@ def tictactoe():
             .all()
     )
     personal_run = db.session.query(TicTacToeRun).filter_by(user_id=current_user.id).first()
-    return render_template('ticTacToe.html', top_scores=top_scores, personal_run=personal_run)
+    # followed users with any tic-tac-toe activity, sorted by best win time, no rows for follows who never played
+    followed_scores = (
+        db.session.query(TicTacToeRun, User)
+            .join(User, TicTacToeRun.user_id == User.id)
+            .filter(TicTacToeRun.user_id.in_(_followed_user_ids()))
+            .order_by(TicTacToeRun.best_win_ms.is_(None), TicTacToeRun.best_win_ms.asc())
+            .all()
+    )
+    return render_template(
+        'ticTacToe.html',
+        top_scores=top_scores,
+        personal_run=personal_run,
+        followed_scores=followed_scores,
+    )
 
 
 @main_bp.route('/game1')
@@ -186,7 +205,20 @@ def game1():
     )
 
     personal_run = db.session.query(WheresWilsonRun).filter_by(user_id=current_user.id).first()
-    return render_template('game1.html', top_scores=top_scores, personal_run=personal_run)
+    # followed users that have a wilson run, fastest first
+    followed_scores = (
+        db.session.query(WheresWilsonRun, User)
+        .join(User, WheresWilsonRun.user_id == User.id)
+        .filter(WheresWilsonRun.user_id.in_(_followed_user_ids()))
+        .order_by(WheresWilsonRun.time_ms.asc())
+        .all()
+    )
+    return render_template(
+        'game1.html',
+        top_scores=top_scores,
+        personal_run=personal_run,
+        followed_scores=followed_scores,
+    )
 
 
 @main_bp.route('/play/kai')
@@ -201,12 +233,21 @@ def play_kai():
             .all()
     )
     personal_run = db.session.query(KaiRun).filter_by(user_id=current_user.id).first()
+    # followed users with a snack-time run, same sort rules as the top 3 so the ordering matches
+    followed_scores = (
+        db.session.query(KaiRun, User)
+            .join(User, KaiRun.user_id == User.id)
+            .filter(KaiRun.user_id.in_(_followed_user_ids()))
+            .order_by(KaiRun.time_ms.desc(), avg_eat_no_data.asc(), KaiRun.avg_eat_ms.asc())
+            .all()
+    )
     js_path = os.path.join(current_app.static_folder, 'js', 'kai-game.js')
     js_version = int(os.path.getmtime(js_path))
     return render_template(
         'games/kai.html',
         top_scores=top_scores,
         personal_run=personal_run,
+        followed_scores=followed_scores,
         js_version=js_version,
     )
 

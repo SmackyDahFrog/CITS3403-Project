@@ -5,6 +5,7 @@
 {% block extra_css %}
 <link rel="icon" href="{{ url_for('static', filename='images/tictactoe.png') }}" type="image/png">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/ticTacToe.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/following.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -68,6 +69,22 @@
             {% else %}
             <li class="list-group-item bg-dark text-white">No games yet, play to set your record.</li>
             {% endif %}
+        </ul>
+
+        <h3 class="text-center mt-4">Following</h3>
+        <ul class="list-group followed-leaderboard">
+            {% for run, user in followed_scores %}
+            <li class="list-group-item bg-dark text-white d-flex align-items-center">
+                <img class="followed-avatar"
+                     src="{{ url_for('static', filename='images/avatars/' ~ (user.avatar or 'av1') ~ '.png') }}" alt="">
+                <span class="flex-grow-1 text-start">{{ user.display_name or user.username }}</span>
+                <span>
+                    {% if run.best_win_ms %}{{ '%.3f'|format(run.best_win_ms / 1000) }}s &middot; {% endif %}{{ run.wins }}W {{ run.draws }}D {{ run.losses }}L
+                </span>
+            </li>
+            {% else %}
+            <li class="list-group-item bg-dark text-white">No followed users have played Tic-Tac-Toe yet.</li>
+            {% endfor %}
         </ul>
     </div>
 </div>
