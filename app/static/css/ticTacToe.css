@@ -55,8 +55,7 @@
     grid-template-columns: repeat(3, 110px);
     grid-template-rows: repeat(3, 110px);
     gap: 8px;
-    justify-content: center;
-    margin: 40px auto;
+    margin: 40px 0;
 }
 
 .tttCell {
@@ -80,6 +79,40 @@
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
     50%      { transform: scale(1.1); }
+}
+
+.ttt-board-wrapper {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto;
+}
+
+.ttt-end-screen {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.ttt-end-content {
+    background: black;
+    padding: 1.5rem 2rem;
+    border-radius: 12px;
+    color: #ffffff;
+}
+
+.ttt-end-title {
+    font-size: 1.4rem;
+    margin-bottom: 4px;
+}
+
+.ttt-end-time {
+    font-size: 1.75rem;
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 1rem;
 }
 
 .ttt-leaderboard {
