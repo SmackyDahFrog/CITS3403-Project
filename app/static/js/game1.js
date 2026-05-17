@@ -42,12 +42,36 @@ wilson.addEventListener('click', () => {
     gameFinished = true;
     clearInterval(timerInterval);
 
-    const finalTime = (Date.now() - startTime) / 1000;
+    const finalTimeMS = (Date.now() - startTime);
+    const finalTime = finalTimeMS / 1000;
+
     timer.textContent = `Time: ${finalTime.toFixed(2)}s`;
+
+    submitResult(finalTimeMS);
 
     resultMessage.textContent= `You found Wilson in ${finalTime.toFixed(2)} seconds!`;
     resultOverlay.style.display = 'flex';
 });
+
+function submitResult(timeMS) {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+    fetch('/api/game1/runs', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken' : token
+        },
+        body: JSON.stringify({ time_ms: timeMS })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.is_new_best) {
+            setTimeout(() => window.location.reload(), 1500);
+        }
+    })
+    .catch(() => {});
+}
 
 function setWilsonPosition() {
     const randomIndex = Math.floor(Math.random() * wilsonPositions.length);

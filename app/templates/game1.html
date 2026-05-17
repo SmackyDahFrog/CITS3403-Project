@@ -1,58 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Where's Wilson</title>
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/game1.css') }}">
-    </head>
+{% block title %}Where's Wilson{% endblock %}
 
-    <body>
+{% block extra_css %}
+<link rel="icon" href="{{ url_for('static', filename='images/wilson.png') }}" type="image/png">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/game1.css') }}">
+{% endblock %}
 
-        <div class="container py-4 text-center">
-            <!--Instructions-->
-            <h1>Where's Wilson?</h1>
-            <p>Find Wilson as fast as you can by clicking on him!</p>
-            <p id="timer">Time: 0.00s</p>
+{% block content %}
+<div class="container py-4 text-center">
+        <!--Instructions-->
+        <h1>Where's Wilson?</h1>
+        <p>Find Wilson as fast as you can by clicking on him!</p>
+        <p id="timer">Time: 0.00s</p>
 
-            <div class="game-area">
-                <!--img-fluid to make sure it works on multiple different screens-->
-                <img src="{{ url_for('static', filename='images/game1background.jpg') }}" alt="Where's Wilson game background" class="img-fluid background-image">
-                <img src="{{ url_for('static', filename='images/wilson.png') }}" alt="Wilson" id="wilson">
+        <div class="game-area">
+        <!--img-fluid to make sure it works on multiple different screens-->
+        <img src="{{ url_for('static', filename='images/game1background.jpg') }}" alt="Where's Wilson game background" class="img-fluid background-image">
+        <img src="{{ url_for('static', filename='images/wilson.png') }}" alt="Wilson" id="wilson">
 
-                <div class="start-overlay" id="startOverlay">
-                    <div class="overlay-content text-center">
-                        <p class="mb-3">Press Start when you're ready!</p>
-                        <button id="start-button" class="btn btn-light">Start</button>
-                        <div class="mt-2">
-                            <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
-                        </div>
-                    </div>
+        <div class="start-overlay" id="startOverlay">
+            <div class="overlay-content text-center">
+                <p class="mb-3">Press Start when you're ready!</p>
+                <button id="start-button" class="btn btn-light">Start</button>
+                <div class="mt-2">
+                    <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
                 </div>
-
-                <div class="result-overlay" id="resultOverlay">
-                    <div class="overlay-content text-center">
-                        <p id="result-message" class="mb-3"></p>
-                        <button id="play-again-button" class="btn btn-light">Play Again</button>
-                        <div class="mt-2">
-                            <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
-                        </div>
-                    </div>
-                </div>
-
             </div>
-
-            <div class="mt-4">
-                <h2>Leaderboard</h2>
-                <p>Scores will go here</p>
-            </div>
-
         </div>
 
-        <script src="{{ url_for('static', filename='js/game1.js') }}"></script>
-        
-    </body>
+        <div class="result-overlay" id="resultOverlay">
+            <div class="overlay-content text-center">
+                <p id="result-message" class="mb-3"></p>
+                <button id="play-again-button" class="btn btn-light">Play Again</button>
+                <div class="mt-2">
+                    <a href="{{ url_for('main.stages') }}" class="btn btn-outline-light">Back to Stages</a>
+                </div>
+            </div>
+        </div>
+    </div>
 
-</html>
+    <div class="mt-4">
+        <h2>Top 3</h2>
+        <ol class="list-group">
+            {% for run, user in top_scores %}
+            <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                <span>{{ user.display_name or user.username }}</span>
+                <span>{{ '%.3f'|format(run.time_ms / 1000) }}s</span>
+            </li>
+            {% else %}
+            <li class="list-group-item bg-dark text-white">No scores yet! Where's Wilson?</li>
+            {% endfor %}
+        </ol>
+
+        <h2 class="mt-4">Your Best</h2>
+        <ul class="list-group">
+            {% if personal_run %}
+            <li class="list-group-item bg-dark text-white d-flex justify-content-between">
+                <span>{{ current_user.display_name or current_user.username }}</span>
+                <span>{{ '%.3f'|format(personal_run.time_ms / 1000) }}s</span>
+            </li>
+            {% else %}
+            <li class="list-group-item bg-dark text-white">Looks like you haven't made any attempts! Find Wilson!</li>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/game1.js') }}"></script>
+{% endblock %}

@@ -102,6 +102,25 @@
                         🏠 Home
                     </a>
                 </li>
+                <li><span class="sidebar-section-label">Games</span></li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.game1' %}active{% endif %}"
+                        href="{{ url_for('main.game1') }}">
+                        <img src="{{ url_for('static', filename='images/wilson.png') }}"
+                            alt="Where's Wilson" width="18" height="18"
+                            style="object-fit:contain; border-radius:3px">
+                        Where's Wilson
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.tictactoe' %}active{% endif %}"
+                       href="{{ url_for('main.tictactoe') }}">
+                        <img src="{{ url_for('static', filename='images/tictactoe.png') }}"
+                             alt="Tic-Tac-Toe" width="18" height="18"
+                             style="object-fit:contain; border-radius:3px;">
+                        RNG Tic-Tac-Toe
+                    </a>
+                </li>
             </ul>
 
             {% if current_user.is_authenticated %}
