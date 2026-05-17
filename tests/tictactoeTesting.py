@@ -10,7 +10,7 @@ Requirements (Selenium only):
     https://googlechromelabs.github.io/chrome-for-testing/
 
 Run all tests:
-    python -m unittest tests/ttictactoeTesting.py
+    python -m unittest tests.tictactoeTesting
 """
 
 import os
