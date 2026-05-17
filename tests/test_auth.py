@@ -99,9 +99,7 @@ class AuthTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b'TopSecret9!', response.data)
 
-    @unittest.expectedFailure
     def test_login_with_wrong_password_fails(self):
-        """Expected to fail until MainPage.html renders flashed messages."""
         user = User(username='kaiTest')
         user.set_password('password1')
         db.session.add(user)
