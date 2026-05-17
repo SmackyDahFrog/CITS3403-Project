@@ -39,6 +39,26 @@
                             {% endfor %}
                         {% endif %}
                     </div>
+                    
+                    <!-- Secret Question (optional) -->
+                    <div class="mb-4">
+                        <label class="form-label">
+                            Security Question
+                            <span class="text-muted small">(optional — needed for password recovery)</span>
+                        </label>
+                        <select name="secret_question" class="form-select mb-2">
+                            <option value="">-- Skip for now --</option>
+                            <option value="pet">What was the name of your first pet?</option>
+                            <option value="school">What primary school did you attend?</option>
+                            <option value="city">What city were you born in?</option>
+                            <option value="mother">What is your mother's maiden name?</option>
+                            <option value="team">What is your favourite sports team?</option>
+                        </select>
+                        <input type="password" name="secret_answer" class="form-control"
+                            placeholder="Your answer (case-insensitive)">
+                        <div class="form-text">You can always set or update this later in Account Settings.</div>
+                    </div>    
+                    
                     <button type="submit" class="btn btn-primary w-100 mb-3">
                         Save &amp; Start Playing
                     </button>

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import PasswordField, SelectField, StringField, SubmitField
-from wtforms.validators import DataRequired, EqualTo, Length, Regexp, ValidationError
+from wtforms.validators import DataRequired, EqualTo, Length, Optional, Regexp, ValidationError
 from app.models import User
 
 SECRET_QUESTIONS = [
@@ -43,8 +43,9 @@ class SignupForm(FlaskForm):
 class CustomisationForm(FlaskForm):
     display_name = StringField('Display Name', validators=[DataRequired(), Length(max=20)])
     avatar = StringField('Avatar', validators=[DataRequired(), Length(max=20)])
-    submit = SubmitField('Save')
-
+    secret_question = SelectField('Security Question', choices=SECRET_QUESTIONS, validators=[Optional()])
+    secret_answer = StringField('Answer', validators=[Optional(), Length(max=100)])
+    submit = SubmitField('Save & Start Playing')
 class ChangeDisplayNameForm(FlaskForm):
     display_name = StringField('Display Name', validators=[DataRequired(), Length(max=20)])
     submit_displayname = SubmitField('Save display name')
