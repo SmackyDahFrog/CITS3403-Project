@@ -63,6 +63,53 @@ function scheduleRestart() {
     restartTimeout = setTimeout(resetGame, 1500);
 }
 
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+async function refreshLeaderboard() {
+    try {
+        const res = await fetch('/api/tictactoe/leaderboard');
+        const data = await res.json();
+
+        const topList = document.querySelector('.ttt-leaderboard ol.list-group');
+        if (topList) {
+            if (data.top.length === 0) {
+                topList.innerHTML = '<li class="list-group-item bg-dark text-white">No wins yet, be the first.</li>';
+            } else {
+                topList.innerHTML = data.top.map(e =>
+                    `<li class="list-group-item bg-dark text-white d-flex justify-content-between">` +
+                    `<span>${escapeHtml(e.name)}</span>` +
+                    `<span>${(e.best_win_ms / 1000).toFixed(3)}s &middot; ${e.wins}W ${e.draws}D ${e.losses}L</span>` +
+                    `</li>`
+                ).join('');
+            }
+        }
+
+        const personalList = document.querySelector('.ttt-leaderboard ul.list-group');
+        if (personalList) {
+            if (!data.personal) {
+                personalList.innerHTML = '<li class="list-group-item bg-dark text-white">No games yet, play to set your record.</li>';
+            } else {
+                const timeStr = data.personal.best_win_ms != null
+                    ? `${(data.personal.best_win_ms / 1000).toFixed(3)}s &middot; `
+                    : '';
+                personalList.innerHTML =
+                    `<li class="list-group-item bg-dark text-white d-flex justify-content-between">` +
+                    `<span>${escapeHtml(data.personal.name)}</span>` +
+                    `<span>${timeStr}${data.personal.wins}W ${data.personal.draws}D ${data.personal.losses}L</span>` +
+                    `</li>`;
+            }
+        }
+    } catch (e) {
+        console.error('leaderboard refresh failed:', e);
+    }
+}
+
 async function submitResult(outcome, timeMs) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     const body = { result: outcome };
@@ -77,7 +124,11 @@ async function submitResult(outcome, timeMs) {
             body: JSON.stringify(body),
         });
         const data = await res.json();
-        if (data.ok && outcome === 'win') setTimeout(() => location.reload(), 1500);
+        if (data.ok && outcome === 'win') {
+            setTimeout(() => location.reload(), 1500);
+        } else if (data.ok) {
+            refreshLeaderboard();
+        }
     } catch (e) {
         console.error('tictactoe score submit failed:', e);
     }
