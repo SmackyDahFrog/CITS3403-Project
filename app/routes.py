@@ -87,6 +87,9 @@ def customisation():
     if form.validate_on_submit():
         current_user.display_name = form.display_name.data
         current_user.avatar = form.avatar.data
+        if form.secret_question.data:
+            current_user.secret_question = form.secret_question.data
+            current_user.set_secret_answer(form.secret_answer.data)
         db.session.commit()
         return redirect(url_for('main.stages'))
     return render_template('customisation.html', form=form)
