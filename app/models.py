@@ -40,6 +40,17 @@ class Score(db.Model):
     user = db.relationship('User', backref='scores')
     def __repr__(self):
         return f'<Score {self.game}:{self.value} user={self.user_id}>'
+    
+class WheresWilsonRun(db.Model):
+    __tablename__ = 'wheres_wilson_runs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False, unique=True)
+    time_ms = db.Column(db.Integer, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user = db.relationship('User', backref='wheres_wilson_runs')
+
 class TicTacToeRun(db.Model):
     __tablename__ = 'tictactoe_runs'
     id = db.Column(db.Integer, primary_key=True)
