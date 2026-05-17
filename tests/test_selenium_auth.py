@@ -62,10 +62,34 @@ def _add_test_user():
 # ---------------------------------------------------------------------------
 class SeleniumLoginTests(TestCase):
 
+    def _click_submit(self):
+        """Scroll the submit button into view then click it.
+
+        The fixed navbar sits over elements near the bottom of the viewport in
+        headless Chrome, causing ElementClickInterceptedException if we click
+        without scrolling first.
+        """
+        btn = WebDriverWait(self.driver, 5).until(
+            EC.element_to_be_clickable((By.CSS_SELECTOR, "[type=submit]"))
+        )
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", btn)
+        time.sleep(0.2)
+        btn.click()
+
+    def _remove_db(self):
+        """Delete the test DB file, retrying briefly on Windows file-lock errors."""
+        for _ in range(8):
+            try:
+                if os.path.exists(TEST_DB_PATH):
+                    os.remove(TEST_DB_PATH)
+                return
+            except PermissionError:
+                time.sleep(0.5)
+
     def setUp(self):
-        # Remove any stale DB file from a previous run
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
+        # Remove any stale DB file from a previous run (retry loop handles
+        # Windows WinError 32 when a previous subprocess still holds the lock)
+        self._remove_db()
 
         # Set up the DB in the parent process — the server subprocess will
         # read from the same file.
@@ -90,12 +114,12 @@ class SeleniumLoginTests(TestCase):
 
     def tearDown(self):
         self.server.terminate()
+        self.server.join(timeout=3)  # Wait for subprocess to fully exit on Windows
         self.driver.quit()
         db.session.remove()
         db.drop_all()
         self.app_context.pop()
-        if os.path.exists(TEST_DB_PATH):
-            os.remove(TEST_DB_PATH)
+        self._remove_db()  # Retry loop handles delayed file-lock release on Windows
 
     # -----------------------------------------------------------------------
     # Tests
@@ -118,7 +142,7 @@ class SeleniumLoginTests(TestCase):
             EC.presence_of_element_located((By.NAME, "username"))
         ).send_keys("seluser")
         self.driver.find_element(By.NAME, "password").send_keys("Test@1234")
-        self.driver.find_element(By.CSS_SELECTOR, "[type=submit]").click()
+        self._click_submit()
         wait.until(EC.url_contains("/stages"))
         self.assertIn("/stages", self.driver.current_url)
 
@@ -129,7 +153,7 @@ class SeleniumLoginTests(TestCase):
             EC.presence_of_element_located((By.NAME, "username"))
         ).send_keys("seluser")
         self.driver.find_element(By.NAME, "password").send_keys("WrongPass999!")
-        self.driver.find_element(By.CSS_SELECTOR, "[type=submit]").click()
+        self._click_submit()
         error = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "alert")))
         self.assertIn("Invalid username or password", error.text)
 
@@ -140,7 +164,7 @@ class SeleniumLoginTests(TestCase):
             EC.presence_of_element_located((By.NAME, "username"))
         ).send_keys("ghost_user")
         self.driver.find_element(By.NAME, "password").send_keys("Test@1234")
-        self.driver.find_element(By.CSS_SELECTOR, "[type=submit]").click()
+        self._click_submit()
         error = wait.until(EC.presence_of_element_located((By.CLASS_NAME, "alert")))
         self.assertIn("Invalid username or password", error.text)
 
@@ -152,7 +176,7 @@ class SeleniumLoginTests(TestCase):
             EC.presence_of_element_located((By.NAME, "username"))
         ).send_keys("seluser")
         self.driver.find_element(By.NAME, "password").send_keys("Test@1234")
-        self.driver.find_element(By.CSS_SELECTOR, "[type=submit]").click()
+        self._click_submit()
         wait.until(EC.url_contains("/stages"))
         # Navigate to /logout
         self.driver.get(LOCAL_HOST + "logout")
@@ -180,18 +204,21 @@ class SeleniumLoginTests(TestCase):
         ).send_keys("brandnewuser")
         self.driver.find_element(By.NAME, "password").send_keys("Test@1234")
         self.driver.find_element(By.NAME, "confirm_password").send_keys("Test@1234")
-        self.driver.find_element(By.CSS_SELECTOR, "[type=submit]").click()
+        self._click_submit()
         wait.until(EC.url_contains("/customisation"))
         self.assertIn("/customisation", self.driver.current_url)
 
     def test_forgot_password_link_navigates(self):
         """Clicking the 'Forgot password?' link reaches the forgot-password page."""
         wait = WebDriverWait(self.driver, 5)
-        wait.until(
-            EC.presence_of_element_located(
-                (By.PARTIAL_LINK_TEXT, "Forgot password")
-            )
-        ).click()
+        link = wait.until(
+            EC.element_to_be_clickable((By.PARTIAL_LINK_TEXT, "Forgot password"))
+        )
+        # Scroll into view first — the fixed navbar can intercept clicks on
+        # elements near the bottom of the viewport in headless Chrome
+        self.driver.execute_script("arguments[0].scrollIntoView(true);", link)
+        time.sleep(0.3)
+        link.click()
         wait.until(EC.url_contains("/forgot-password"))
         self.assertIn("/forgot-password", self.driver.current_url)
 
