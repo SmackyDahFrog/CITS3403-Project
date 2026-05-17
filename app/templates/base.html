@@ -121,6 +121,12 @@
                         RNG Tic-Tac-Toe
                     </a>
                 </li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.play_kai' %}active{% endif %}"
+                       href="{{ url_for('main.play_kai') }}">
+                        🍪 Snack-Time
+                    </a>
+                </li>
             </ul>
 
             {% if current_user.is_authenticated %}
