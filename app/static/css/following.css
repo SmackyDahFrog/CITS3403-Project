@@ -1,0 +1,36 @@
+/* Following page: search box + follower list. Dark theme to match the rest of the site. */
+
+#userSearch {
+    background-color: #1a1a1a;
+    color: #eee;
+    border: 1px solid #333;
+}
+
+#userSearch:focus {
+    background-color: #1a1a1a;
+    color: #fff;
+    border-color: #6666dd;
+    box-shadow: 0 0 0 0.2rem rgba(102, 102, 221, 0.25);
+}
+
+#userSearch::placeholder {
+    color: #777;
+}
+
+#searchResults .list-group-item,
+#followingList .list-group-item {
+    border-color: #2a2a2a;
+}
+
+/* shared 'followed users' panel that gets dropped onto each game page */
+.followed-leaderboard .list-group-item {
+    border-color: #2a2a2a;
+}
+
+.followed-leaderboard img.followed-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 8px;
+}

@@ -102,6 +102,12 @@
                         🏠 Home
                     </a>
                 </li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.following' %}active{% endif %}"
+                       href="{{ url_for('main.following') }}">
+                        👥 Following
+                    </a>
+                </li>
                 <li><span class="sidebar-section-label">Games</span></li>
                 <li>
                     <a class="sidebar-link {% if request.endpoint == 'main.game1' %}active{% endif %}"
@@ -119,6 +125,12 @@
                              alt="Tic-Tac-Toe" width="18" height="18"
                              style="object-fit:contain; border-radius:3px;">
                         RNG Tic-Tac-Toe
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link {% if request.endpoint == 'main.play_kai' %}active{% endif %}"
+                       href="{{ url_for('main.play_kai') }}">
+                        🍪 Snack-Time
                     </a>
                 </li>
             </ul>

@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{{ url_for('static', filename='css/kai.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/following.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -57,6 +58,22 @@
                 {% else %}
                 <li class="list-group-item bg-dark text-white">No run yet, play to set your best.</li>
                 {% endif %}
+            </ul>
+
+            <h3 class="text-center mt-4">Following</h3>
+            <ul class="list-group followed-leaderboard">
+                {% for run, user in followed_scores %}
+                <li class="list-group-item bg-dark text-white d-flex align-items-center">
+                    <img class="followed-avatar"
+                         src="{{ url_for('static', filename='images/avatars/' ~ (user.avatar or 'av1') ~ '.png') }}" alt="">
+                    <span class="flex-grow-1 text-start">{{ user.display_name or user.username }}</span>
+                    <span>
+                        {{ '%.3f'|format(run.time_ms / 1000) }}s{% if run.avg_eat_ms %} &middot; {{ '%.3f'|format(run.avg_eat_ms / 1000) }}s/munch{% endif %}
+                    </span>
+                </li>
+                {% else %}
+                <li class="list-group-item bg-dark text-white">No followed users have a Snack-Time run yet.</li>
+                {% endfor %}
             </ul>
         </div>
     </div>

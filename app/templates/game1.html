@@ -5,6 +5,7 @@
 {% block extra_css %}
 <link rel="icon" href="{{ url_for('static', filename='images/wilson.png') }}" type="image/png">
 <link rel="stylesheet" href="{{ url_for('static', filename='css/game1.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/following.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -63,6 +64,20 @@
             {% else %}
             <li class="list-group-item bg-dark text-white">Looks like you haven't made any attempts! Find Wilson!</li>
             {% endif %}
+        </ul>
+
+        <h2 class="mt-4">Following</h2>
+        <ul class="list-group followed-leaderboard">
+            {% for run, user in followed_scores %}
+            <li class="list-group-item bg-dark text-white d-flex align-items-center">
+                <img class="followed-avatar"
+                     src="{{ url_for('static', filename='images/avatars/' ~ (user.avatar or 'av1') ~ '.png') }}" alt="">
+                <span class="flex-grow-1 text-start">{{ user.display_name or user.username }}</span>
+                <span>{{ '%.3f'|format(run.time_ms / 1000) }}s</span>
+            </li>
+            {% else %}
+            <li class="list-group-item bg-dark text-white">No followed users with a Wilson run yet.</li>
+            {% endfor %}
         </ul>
     </div>
 </div>
