@@ -16,17 +16,30 @@
         <p class="tttSubtitle">Verse a computer in Tic-Tac-Toe, where it plays optimally. It will sometimes make a random move, so use that as a chance to win!</p>
         <p id="tttTimer" class="tttTimer">0.000s</p>
 
-        <main class="tttBoard">
-            <button class="tttCell" data-index="0"></button>
-            <button class="tttCell" data-index="1"></button>
-            <button class="tttCell" data-index="2"></button>
-            <button class="tttCell" data-index="3"></button>
-            <button class="tttCell" data-index="4"></button>
-            <button class="tttCell" data-index="5"></button>
-            <button class="tttCell" data-index="6"></button>
-            <button class="tttCell" data-index="7"></button>
-            <button class="tttCell" data-index="8"></button>
-        </main>
+        <div class="ttt-board-wrapper">
+            <main class="tttBoard">
+                <button class="tttCell" data-index="0"></button>
+                <button class="tttCell" data-index="1"></button>
+                <button class="tttCell" data-index="2"></button>
+                <button class="tttCell" data-index="3"></button>
+                <button class="tttCell" data-index="4"></button>
+                <button class="tttCell" data-index="5"></button>
+                <button class="tttCell" data-index="6"></button>
+                <button class="tttCell" data-index="7"></button>
+                <button class="tttCell" data-index="8"></button>
+            </main>
+
+            <div id="tttEndScreen" class="ttt-end-screen" style="display:none;">
+                <div class="ttt-end-content text-center">
+                    <p id="tttEndTitle" class="ttt-end-title"></p>
+                    <p id="tttEndTime" class="ttt-end-time"></p>
+                    <button id="tttRetryBtn" class="ttt-btn-light">Retry (R)</button>
+                    <div class="mt-2">
+                        <a href="{{ url_for('main.stages') }}" class="ttt-btn-outline-light">Back to Stages</a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="tttControls">
             <button type="button" id="resetBtn" class="ttt-btn-light">Restart (R)</button>
