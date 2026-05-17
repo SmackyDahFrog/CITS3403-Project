@@ -3,6 +3,8 @@ from wtforms import PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Length, Optional, Regexp, ValidationError
 from app.models import User
 
+VALID_AVATARS = {'av1', 'av2', 'av3', 'av4', 'av5', 'av6', 'av7', 'av8'}
+
 SECRET_QUESTIONS = [
     ('', '— Select a question —'),
     ("What was the name of your first pet?", "What was the name of your first pet?"),
@@ -40,9 +42,13 @@ class SignupForm(FlaskForm):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError('That username is already taken.')
 
+def _validate_avatar(_, field):
+    if field.data not in VALID_AVATARS:
+        raise ValidationError('Invalid avatar selection.')
+
 class CustomisationForm(FlaskForm):
     display_name = StringField('Display Name', validators=[DataRequired(), Length(max=20)])
-    avatar = StringField('Avatar', validators=[DataRequired(), Length(max=20)])
+    avatar = StringField('Avatar', validators=[DataRequired(), _validate_avatar])
     secret_question = SelectField('Security Question', choices=SECRET_QUESTIONS, validators=[Optional()])
     secret_answer = StringField('Answer', validators=[Optional(), Length(max=100)])
     submit = SubmitField('Save & Start Playing')
@@ -51,7 +57,7 @@ class ChangeDisplayNameForm(FlaskForm):
     submit_displayname = SubmitField('Save display name')
 
 class ChangeAvatarForm(FlaskForm):
-    avatar = StringField('Avatar', validators=[DataRequired(), Length(max=20)])
+    avatar = StringField('Avatar', validators=[DataRequired(), _validate_avatar])
     submit_avatar = SubmitField('Save avatar')
 
 class ChangePasswordForm(FlaskForm):
