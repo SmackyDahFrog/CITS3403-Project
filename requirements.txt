@@ -5,6 +5,5 @@ Flask-Login==0.6.3
 Flask-WTF==1.2.2
 WTForms==3.2.1
 SQLAlchemy==2.0.40
-email_validator==2.2.0
 python-dotenv==1.1.0
 selenium==4.44.0
