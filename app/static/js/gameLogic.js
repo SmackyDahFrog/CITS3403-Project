@@ -4,6 +4,7 @@ let gameStartTime = Date.now();
 let pauseStartTime = null;
 let timerInterval = null;
 let restartTimeout = null;
+let lastOutcomeWin = false;
 
 const timerEl = document.getElementById('tttTimer');
 
@@ -63,6 +64,13 @@ function scheduleRestart() {
     restartTimeout = setTimeout(resetGame, 1500);
 }
 
+function showEndScreen(timeMs) {
+    lastOutcomeWin = true;
+    document.getElementById('tttEndTitle').textContent = 'You Win!';
+    document.getElementById('tttEndTime').textContent = (timeMs / 1000).toFixed(3) + 's';
+    document.getElementById('tttEndScreen').style.display = 'flex';
+}
+
 async function submitResult(outcome, timeMs) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
     const body = { result: outcome };
@@ -76,8 +84,7 @@ async function submitResult(outcome, timeMs) {
             },
             body: JSON.stringify(body),
         });
-        const data = await res.json();
-        if (data.ok && outcome === 'win') setTimeout(() => location.reload(), 1500);
+        await res.json();
     } catch (e) {
         console.error('tictactoe score submit failed:', e);
     }
@@ -120,12 +127,12 @@ function aiMove() {
 
     const winner = handleResult(checkWinner(board));
     if (winner) {
-        const outcome = winner === 'X' ? 'win' : winner === 'draw' ? 'draw' : 'loss';
-        submitResult(outcome, outcome === 'win' ? Date.now() - gameStartTime : undefined);
-        if (outcome !== 'win') scheduleRestart();
+        const outcome = winner === 'draw' ? 'draw' : 'loss';
+        submitResult(outcome);
+        scheduleRestart();
     }
 }
- 
+
 cells.forEach((cell, i) => {
     cell.addEventListener('click', () => {
         if (board[i] !== '' || gameOver) return;
@@ -133,11 +140,20 @@ cells.forEach((cell, i) => {
         board[i] = 'X';
         cell.textContent = 'X';
 
+        // capture time before any processing so DB, win screen, and top timer all match
+        const timeMs = Date.now() - gameStartTime;
+
         const winner = handleResult(checkWinner(board));
         if (winner) {
             const outcome = winner === 'X' ? 'win' : winner === 'draw' ? 'draw' : 'loss';
-            submitResult(outcome, outcome === 'win' ? Date.now() - gameStartTime : undefined);
-            if (outcome !== 'win') scheduleRestart();
+            if (outcome === 'win') {
+                timerEl.textContent = (timeMs / 1000).toFixed(3) + 's';
+                submitResult('win', timeMs);
+                showEndScreen(timeMs);
+            } else {
+                submitResult(outcome);
+                scheduleRestart();
+            }
             return;
         }
 
@@ -146,6 +162,10 @@ cells.forEach((cell, i) => {
 });
 
 function resetGame() {
+    if (lastOutcomeWin) {
+        location.reload();
+        return;
+    }
     clearTimeout(restartTimeout);
     restartTimeout = null;
     board = ['', '', '', '', '', '', '', '', ''];
@@ -163,6 +183,7 @@ function resetGame() {
 }
 
 document.getElementById('resetBtn').addEventListener('click', resetGame);
+document.getElementById('tttRetryBtn').addEventListener('click', resetGame);
 
 document.addEventListener('keydown', e => {
     if (e.key === 'r' || e.key === 'R') resetGame();

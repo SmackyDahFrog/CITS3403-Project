@@ -30,10 +30,6 @@ def create_app(config_class=DevelopmentConfig):
     from app.routes import main_bp
     app.register_blueprint(main_bp)
 
-    # build any missing tables on first boot so dev runs without flask db upgrade
-    with app.app_context():
-        db.create_all()
-
     return app
 
 
