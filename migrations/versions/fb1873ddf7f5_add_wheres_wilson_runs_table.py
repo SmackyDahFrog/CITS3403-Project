@@ -20,7 +20,7 @@ def upgrade():
     op.create_table('wheres_wilson_runs',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('time_ms', sa.Integer(), nullable=Flase),
+    sa.Column('time_ms', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
