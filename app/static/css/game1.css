@@ -16,6 +16,13 @@ body {
     border-radius: 8px;
 }
 
+.game1-leaderboard {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+    padding-bottom: 2rem;
+}
+
 #wilson {
     position: absolute;
     cursor: pointer;
